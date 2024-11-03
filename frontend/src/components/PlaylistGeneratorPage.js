@@ -14,19 +14,27 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
   useEffect(() => {
     if (!accessToken) return;
 
-    // Load Spotify Web Playback SDK script
-    const loadSpotifySDK = () => {
-      const script = document.createElement('script');
-      script.src = 'https://sdk.scdn.co/spotify-player.js';
-      script.async = true;
-      document.body.appendChild(script);
+    // Ensure the global Spotify function is available as a fallback
+    window.onSpotifyWebPlaybackSDKReady = () => initializePlayer();
 
-      script.onload = () => {
+    const loadSpotifySDK = () => {
+      if (!document.getElementById('spotify-sdk')) {
+        const script = document.createElement('script');
+        script.id = 'spotify-sdk';
+        script.src = 'https://sdk.scdn.co/spotify-player.js';
+        script.async = true;
+        document.body.appendChild(script);
+
+        script.onload = () => {
+          if (window.Spotify) {
+            initializePlayer();
+          }
+        };
+      } else if (window.Spotify) {
         initializePlayer();
-      };
+      }
     };
 
-    // Initialize Spotify Player
     const initializePlayer = () => {
       if (!window.Spotify) {
         console.error("Spotify SDK not loaded.");
@@ -39,7 +47,6 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
         volume: 0.5
       });
 
-      // Player ready
       newPlayer.addListener('ready', ({ device_id }) => {
         setDeviceId(device_id);
         console.log("Spotify Player ready with Device ID:", device_id);
@@ -51,21 +58,10 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
         setCurrentTrack(state.track_window.current_track);
       });
 
-      newPlayer.addListener('initialization_error', ({ message }) => {
-        console.error("Initialization Error:", message);
-      });
-
-      newPlayer.addListener('authentication_error', ({ message }) => {
-        console.error("Authentication Error:", message);
-      });
-
-      newPlayer.addListener('account_error', ({ message }) => {
-        console.error("Account Error:", message);
-      });
-
-      newPlayer.addListener('playback_error', ({ message }) => {
-        console.error("Playback Error:", message);
-      });
+      newPlayer.addListener('initialization_error', ({ message }) => console.error("Initialization Error:", message));
+      newPlayer.addListener('authentication_error', ({ message }) => console.error("Authentication Error:", message));
+      newPlayer.addListener('account_error', ({ message }) => console.error("Account Error:", message));
+      newPlayer.addListener('playback_error', ({ message }) => console.error("Playback Error:", message));
 
       newPlayer.connect().then(success => {
         if (success) {
@@ -78,13 +74,8 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
       setPlayer(newPlayer);
     };
 
-    if (!window.Spotify) {
-      loadSpotifySDK();
-    } else {
-      initializePlayer();
-    }
+    loadSpotifySDK();
 
-    // Disconnect player on unmount
     return () => {
       if (player) {
         player.disconnect();
@@ -92,7 +83,6 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
     };
   }, [accessToken]);
 
-  // Play a specific track from the playlist
   const playTrack = async (trackUri) => {
     if (!deviceId) return;
 
@@ -110,7 +100,6 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
     setIsPlaying(true);
   };
 
-  // Toggle play/pause
   const togglePlay = async () => {
     if (!player) {
       console.warn("Player is not initialized yet.");
@@ -126,7 +115,6 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
     }
   };
 
-  // Skip to the next track
   const skipToNext = async () => {
     if (!player) {
       console.warn("Player is not initialized yet.");
@@ -136,7 +124,6 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
     await player.nextTrack();
   };
 
-  // Shuffle the playlist
   const toggleShuffle = async () => {
     if (!deviceId) {
       console.warn("Device ID is not available yet. Please try again.");
@@ -157,7 +144,6 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
     }
   };
 
-  // Upload Playlist to Spotify
   const handleUploadPlaylist = async () => {
     if (!playlistName) {
       alert("Please enter a name for your playlist.");
@@ -186,8 +172,8 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
       );
 
       const playlistId = createPlaylistResponse.data.id;
-
       const trackUris = playlist.map(track => track.uri);
+
       for (let i = 0; i < trackUris.length; i += 100) {
         const urisChunk = trackUris.slice(i, i + 100);
         await axios.post(
@@ -199,7 +185,7 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
         );
       }
 
-      setUploadStatus('Playlist uploaded successfully (refresh your Spotify)!');
+      setUploadStatus('Playlist uploaded successfully!');
     } catch (error) {
       console.error("Error uploading playlist:", error);
       setUploadStatus('Failed to upload playlist. Please try again.');
@@ -216,13 +202,12 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
       {playlist.length > 0 ? (
         <ul>
           {playlist.map((track, index) => (
-            <li key={track.id || track.uri || `track-${index}`}>
+            <li key={`${track.id || track.uri}-${index}`}>
               <button onClick={() => playTrack(track.uri)}>Play</button>
               <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(', ')}
             </li>
           ))}
-         </ul>
-      
+        </ul>
       ) : (
         <p>No tracks to display. Please go back and add items to your playlist.</p>
       )}
