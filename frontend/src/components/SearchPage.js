@@ -9,11 +9,16 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
   const [filter, setFilter] = useState('artist');
   const [playlistSize, setPlaylistSize] = useState(50);
 
+  const BACKEND_URL =
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3001'
+      : 'https://playlist-pot.vercel.app';
+
   const handleSearch = async () => {
     if (!query) return;
 
     try {
-      const response = await axios.get(`http://localhost:3001/search`, {
+      const response = await axios.get(`${BACKEND_URL}/search`, {
         params: { query, type: filter },
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -47,7 +52,7 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
     }
 
     try {
-      const response = await axios.post(`http://localhost:3001/mix-playlist`, {
+      const response = await axios.post(`${BACKEND_URL}/mix-playlist`, {
         selectedItems,
         playlistSize,
       }, {
