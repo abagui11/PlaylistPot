@@ -1,0 +1,31 @@
+
+---
+
+### Example `.gitignore`
+
+```plaintext
+# Node.js
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# .env file for environment variables
+.env
+
+# Build and cache
+build/
+.cache/
+
+# MacOS-specific
+.DS_Store
+
+# IDE-specific (VSCode, IntelliJ, etc.)
+.vscode/
+.idea/
+
+# Other
+dist/
+*.lock
