@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+
 const SearchPage = ({ onStartSearch, accessToken }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -24,6 +25,10 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
           Authorization: `Bearer ${accessToken}`,
         },
       });
+
+      // Log the entire response data to inspect its structure
+      console.log("API Response:", response.data);
+
       if (filter === 'artist') {
         setResults(response.data.artists.items || []);
       } else if (filter === 'album') {
