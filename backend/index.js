@@ -9,9 +9,25 @@ const searchRoutes = require('./routes/search');
 const mixPlaylistRoutes = require('./routes/mix-playlist');
 
 const app = express();
+
+const allowedOrigins = [
+    'http://localhost:3000',         // Development frontend
+    'https://playlistpot.com',       // Production frontend
+  ];
+
 const PORT = process.env.STATUS === 'development' ? process.env.DEV_PORT: process.env.PROD_PORT;
 
-app.use(cors());
+
+app.use(cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  }));
 app.use(express.json()); // Add this line to parse JSON bodies
 
 app.use('/api/auth', authRoutes);
