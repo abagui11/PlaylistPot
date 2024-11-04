@@ -43,7 +43,7 @@ router.get('/callback', async (req, res) => {
     // Send the access token back to the main window
     res.send(
       `<script>
-        window.opener.postMessage({ accessToken: "${access_token}" }, "http://localhost:3000");
+        window.opener.postMessage({ accessToken: "${access_token}" }, "${process.env.FRONTEND_URL}");
         window.close();
       </script>`
     );
