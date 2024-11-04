@@ -14,6 +14,7 @@ function App() {
 
 
   const handleLogin = () => {
+    console.log(BACKEND_URL);
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
