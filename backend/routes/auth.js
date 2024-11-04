@@ -5,13 +5,15 @@ const qs = require('querystring');
 require('dotenv').config();
 
 const router = express.Router();
+const REDIRECT_URI = process.env.STATUS === 'development' ? process.env.REDIRECT_URI_DEV: process.env.REDIRECT_URI_PROD;
+const FRONTEND_URL = process.env.STATUS === 'development' ? process.env.FRONTEND_URL_DEV: process.env.FRONTEND_URL_PROD;
 
 // Redirects to Spotify's authorization page
 router.get('/login', (req, res) => {
   const authURL = `https://accounts.spotify.com/authorize?${qs.stringify({
     client_id: process.env.SPOTIFY_CLIENT_ID,
     response_type: 'code',
-    redirect_uri: process.env.REDIRECT_URI,
+    redirect_uri: REDIRECT_URI,
     scope: 'streaming user-read-playback-state user-modify-playback-state playlist-read-private playlist-modify-private',
   })}`;
   res.redirect(authURL);
@@ -26,7 +28,7 @@ router.get('/callback', async (req, res) => {
       qs.stringify({
         grant_type: 'authorization_code',
         code,
-        redirect_uri: process.env.REDIRECT_URI,
+        redirect_uri: REDIRECT_URI,
       }),
       {
         headers: {
@@ -43,7 +45,7 @@ router.get('/callback', async (req, res) => {
     // Send the access token back to the main window
     res.send(
       `<script>
-        window.opener.postMessage({ accessToken: "${access_token}" }, "${process.env.FRONTEND_URL}");
+        window.opener.postMessage({ accessToken: "${access_token}" }, "${FRONTEND_URL}");
         window.close();
       </script>`
     );

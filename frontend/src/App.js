@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import LoginPage from './components/LoginPage';
 import SearchPage from './components/SearchPage';
 import PlaylistGeneratorPage from './components/PlaylistGeneratorPage';
-import BACKEND_URL from './config';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -11,7 +10,9 @@ function App() {
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
   const [mixedPlaylist, setMixedPlaylist] = useState([]);
-
+  //const BACKEND_URL="http://localhost:3001"; // Change for production
+  const BACKEND_URL="http://54.147.156.144:8080";
+  
 
   const handleLogin = () => {
     console.log(BACKEND_URL);
