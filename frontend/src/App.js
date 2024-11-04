@@ -10,8 +10,8 @@ function App() {
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
   const [mixedPlaylist, setMixedPlaylist] = useState([]);
-  const BACKEND_URL="http://localhost:3001"; // Change for production
-  //const BACKEND_URL="http://54.147.156.144:8080";
+  //const BACKEND_URL="http://localhost:3001"; // Change for production
+  const BACKEND_URL="http://54.147.156.144:8080";
   
 
   const handleLogin = () => {

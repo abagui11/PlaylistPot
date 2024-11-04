@@ -8,8 +8,8 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [filter, setFilter] = useState('artist');
   const [playlistSize, setPlaylistSize] = useState(50);
-  const BACKEND_URL="http://localhost:3001"; // Change for production
-  //const BACKEND_URL="http://54.147.156.144:8080";
+  //const BACKEND_URL="http://localhost:3001"; // Change for production
+  const BACKEND_URL="http://54.147.156.144:8080";
 
   const handleSearch = async () => {
     if (!query) return;
