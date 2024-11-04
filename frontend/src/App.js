@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import LoginPage from './components/LoginPage';
 import SearchPage from './components/SearchPage';
 import PlaylistGeneratorPage from './components/PlaylistGeneratorPage';
+import BACKEND_URL from './config';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -11,19 +12,14 @@ function App() {
   const [accessToken, setAccessToken] = useState(null);
   const [mixedPlaylist, setMixedPlaylist] = useState([]);
 
-  // Determine the backend URL dynamically
-  const BACKEND_URL =
-    process.env.NODE_ENV === 'development'
-      ? 'http://localhost:3001'
-      : 'https://playlist-pot.vercel.app';
 
   const handleLogin = () => {
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
-    const authWindow = window.open(
-      `${BACKEND_URL}/auth/login`, // Use dynamic backend URL
+    window.open(
+      `${BACKEND_URL}/api/auth/login`, // Use dynamic backend URL
       '_blank',
       `width=${width},height=${height},top=${top},left=${left}`
     );
@@ -41,7 +37,7 @@ function App() {
 
     window.addEventListener('message', receiveMessage);
     return () => window.removeEventListener('message', receiveMessage);
-  }, [BACKEND_URL]);
+  });
 
   const handleSearch = (playlist) => {
     setMixedPlaylist(playlist);

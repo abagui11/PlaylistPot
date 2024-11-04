@@ -12,8 +12,8 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json()); // Add this line to parse JSON bodies
 
-app.use('/auth', authRoutes);
-app.use(searchRoutes);
-app.use(mixPlaylistRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api', searchRoutes);
+app.use('/api', mixPlaylistRoutes);
 
 app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));
