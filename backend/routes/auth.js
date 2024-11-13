@@ -15,6 +15,7 @@ router.get('/login', (req, res) => {
     redirect_uri: process.env.REDIRECT_URI,
     scope: 'streaming user-read-playback-state user-modify-playback-state playlist-read-private playlist-modify-private',
   })}`;
+  console.log("Auth URL:", authURL); // Log for debugging
   res.redirect(authURL);
 });
 
