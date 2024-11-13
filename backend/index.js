@@ -12,7 +12,7 @@ const app = express();
 
 const allowedOrigins = [
     'http://localhost:3000',         // Development frontend
-    'http://playlistpot.com',       // Production frontend
+    'https://playlistpot.com',       // Production frontend
   ];
 
 const PORT = process.env.STATUS === 'development' ? process.env.DEV_PORT: process.env.PROD_PORT;
