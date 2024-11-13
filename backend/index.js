@@ -13,6 +13,7 @@ const app = express();
 const allowedOrigins = [
     'http://localhost:3000',         // Development frontend
     'https://playlistpot.com',       // Production frontend
+    'https://www.playlistpot.com' 
   ];
 
 const PORT = process.env.STATUS === 'development' ? process.env.DEV_PORT: process.env.PROD_PORT;
@@ -28,6 +29,13 @@ app.use(cors({
     },
     credentials: true,
   }));
+
+// Preflight requests handling
+app.options('*', cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+
 app.use(express.json()); // Add this line to parse JSON bodies
 
 app.use('/api/auth', authRoutes);
