@@ -406,6 +406,20 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
         <p>No tracks to display. Please go back and add items to your playlist.</p>
       )}
 
+      <div>
+        <h2>Controls</h2>
+        <button onClick={togglePlay}>{isPlaying ? 'Pause' : 'Play'}</button>
+        <button onClick={skipToNext}>Next</button>
+        <button onClick={toggleShuffle}>Shuffle</button>
+      </div>
+
+      {currentTrack && (
+        <div>
+          <h3>Now Playing</h3>
+          <p><strong>{currentTrack.name}</strong> by {currentTrack.artists.map(artist => artist.name).join(', ')}</p>
+        </div>
+      )}  
+
       {/* AI Feature */}
       <div>
         <h2>Sprinkle some AI dust</h2>
@@ -434,6 +448,7 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
 
 
       <div>
+        <h2> Upload your playlist to your Spotify </h2>
         <input
           type="text"
           placeholder="Enter playlist name"
@@ -446,20 +461,6 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
         </button>
         {uploadStatus && <p>{uploadStatus}</p>}
       </div>
-
-      <div>
-        <h2>Controls</h2>
-        <button onClick={togglePlay}>{isPlaying ? 'Pause' : 'Play'}</button>
-        <button onClick={skipToNext}>Next</button>
-        <button onClick={toggleShuffle}>Shuffle</button>
-      </div>
-
-      {currentTrack && (
-        <div>
-          <h3>Now Playing</h3>
-          <p><strong>{currentTrack.name}</strong> by {currentTrack.artists.map(artist => artist.name).join(', ')}</p>
-        </div>
-      )}
       
     </div>
     
