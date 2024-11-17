@@ -422,7 +422,7 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
 
       {/* AI Feature */}
       <div>
-        <h2>Sprinkle some AI dust</h2>
+        <h2>ooh aah artificial intelligence</h2>
         <input
           type="text"
           placeholder="Add some jazz"
