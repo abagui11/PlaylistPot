@@ -1,12 +1,13 @@
 // index.js
 const express = require('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 require('dotenv').config();
-console.log(process.env.STATUS); // Output: "production"
 
 const authRoutes = require('./routes/auth');
 const searchRoutes = require('./routes/search');
 const mixPlaylistRoutes = require('./routes/mix-playlist');
+const aiSuggestions = require('./routes/ai-suggestions');
 
 const app = express();
 
@@ -36,10 +37,32 @@ app.options('*', cors({
   credentials: true
 }));
 
-app.use(express.json()); // Add this line to parse JSON bodies
+// Use body-parser with increased limit
+app.use(bodyParser.json({ limit: '10mb' })); // Adjust limit as needed
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
+app.use(express.json());
+
 
 app.use('/api/auth', authRoutes);
 app.use('/api', searchRoutes);
 app.use('/api', mixPlaylistRoutes);
+app.use('/api', aiSuggestions);
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Backend running on http://0.0.0.0:${PORT}`));
+
+app._router.stack.forEach((middleware) => {
+  if (middleware.route) {
+      // This is a route middleware
+      console.log(`Registered route: ${middleware.route.path}`);
+  } else if (middleware.name === 'router') {
+      // This is a router middleware
+      middleware.handle.stack.forEach((route) => {
+          if (route.route) {
+              console.log(`Registered route: ${route.route.path}`);
+          }
+      });
+  }
+});
+
+

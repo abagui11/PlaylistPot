@@ -7,7 +7,7 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
   const [results, setResults] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [filter, setFilter] = useState('artist');
-  const [playlistSize, setPlaylistSize] = useState(50);
+  const [playlistSize, setPlaylistSize] = useState(20);
   //const BACKEND_URL="http://localhost:3001"; // Change for production
   const BACKEND_URL="https://api.playlistpot.com";
   

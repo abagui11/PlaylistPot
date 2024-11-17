@@ -10,6 +10,12 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
   const [playlistName, setPlaylistName] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
+  const [aiPrompt, setAiPrompt] = useState(''); // For user input AI prompt
+  const [aiSuggestions, setAiSuggestions] = useState([]); // To store AI suggestions
+  const [updatedPlaylist, setUpdatedPlaylist] = useState(playlist || []); // For dynamically updating the playlist
+
+  //const BACKEND_URL = "http://localhost:3001"; // Update for production
+  const BACKEND_URL = "https://api.playlistpot.com"; // Update for production
 
   useEffect(() => {
     if (!accessToken) return;
@@ -40,29 +46,49 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
         console.error("Spotify SDK not loaded.");
         return;
       }
-
+    
       const newPlayer = new window.Spotify.Player({
         name: 'Playlist Pot Player',
         getOAuthToken: cb => cb(accessToken),
-        volume: 0.5
+        volume: 0.5,
       });
-
-      newPlayer.addListener('ready', ({ device_id }) => {
+    
+      newPlayer.addListener('ready', async ({ device_id }) => {
         setDeviceId(device_id);
         console.log("Spotify Player ready with Device ID:", device_id);
+    
+        // Transfer playback to the Web Playback SDK's device with retry logic
+        let retries = 3;
+        while (retries > 0) {
+          try {
+            await axios.put(
+              'https://api.spotify.com/v1/me/player',
+              { device_ids: [device_id], play: false },
+              { headers: { Authorization: `Bearer ${accessToken}` } }
+            );
+            console.log("Playback transferred to the Web Playback SDK");
+            break;
+          } catch (error) {
+            retries--;
+            console.warn(`Failed to transfer playback. Retries left: ${retries}`);
+            if (retries === 0) {
+              console.error("Could not transfer playback after multiple retries:", error.response?.data || error.message);
+            }
+          }
+        }
       });
-
+    
       newPlayer.addListener('player_state_changed', (state) => {
         if (!state) return;
         setIsPlaying(!state.paused);
         setCurrentTrack(state.track_window.current_track);
       });
-
+    
       newPlayer.addListener('initialization_error', ({ message }) => console.error("Initialization Error:", message));
       newPlayer.addListener('authentication_error', ({ message }) => console.error("Authentication Error:", message));
       newPlayer.addListener('account_error', ({ message }) => console.error("Account Error:", message));
       newPlayer.addListener('playback_error', ({ message }) => console.error("Playback Error:", message));
-
+    
       newPlayer.connect().then(success => {
         if (success) {
           console.log("Connected to Spotify!");
@@ -70,9 +96,11 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
           console.error("Failed to connect to Spotify.");
         }
       });
-
+    
       setPlayer(newPlayer);
     };
+    
+    
 
     loadSpotifySDK();
 
@@ -84,67 +112,122 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
   }, [accessToken]);
 
   const playTrack = async (trackUri) => {
-    if (!deviceId) return;
-
-    await axios.put(
-      `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
-      {
-        uris: playlist.map(track => track.uri),
-        offset: { uri: trackUri }
-      },
-      {
-        headers: { Authorization: `Bearer ${accessToken}` }
+    if (!deviceId) {
+      console.warn("Device ID not available yet.");
+      return;
+    }
+  
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        await axios.put(
+          `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+          {
+            uris: updatedPlaylist.map(track => track.uri),
+            offset: { uri: trackUri },
+          },
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+        console.log(`Playing track: ${trackUri}`);
+        setIsPlaying(true);
+        break;
+      } catch (error) {
+        retries--;
+        console.warn(`Failed to play track. Retries left: ${retries}`);
+        if (retries === 0) {
+          console.error("Could not play track after multiple retries:", error.response?.data || error.message);
+        }
       }
-    );
-
-    setIsPlaying(true);
+    }
   };
+  
 
   const togglePlay = async () => {
     if (!player) {
       console.warn("Player is not initialized yet.");
       return;
     }
-
-    if (isPlaying) {
-      await player.pause();
-      setIsPlaying(false);
-    } else {
-      await player.resume();
-      setIsPlaying(true);
+  
+    try {
+      if (isPlaying) {
+        await player.pause();
+        setIsPlaying(false);
+        console.log("Playback paused.");
+      } else {
+        await player.resume();
+        setIsPlaying(true);
+        console.log("Playback resumed.");
+      }
+    } catch (error) {
+      console.error("Error toggling playback:", error.response?.data || error.message);
     }
   };
-
+  
   const skipToNext = async () => {
     if (!player) {
       console.warn("Player is not initialized yet.");
       return;
     }
-
-    await player.nextTrack();
+  
+    try {
+      await player.nextTrack();
+      console.log("Skipped to next track.");
+    } catch (error) {
+      console.error("Error skipping to next track:", error.response?.data || error.message);
+    }
   };
-
+  
   const toggleShuffle = async () => {
     if (!deviceId) {
-      console.warn("Device ID is not available yet. Please try again.");
+      console.warn("Device ID is not available yet.");
       return;
     }
-
+  
     try {
       await axios.put(
         `https://api.spotify.com/v1/me/player/shuffle?state=true&device_id=${deviceId}`,
         {},
         {
-          headers: { Authorization: `Bearer ${accessToken}` }
+          headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
       console.log("Shuffle mode toggled.");
     } catch (error) {
-      console.error("Failed to toggle shuffle:", error);
+      console.error("Failed to toggle shuffle:", error.response?.data || error.message);
     }
   };
 
+  const preloadTrack = async (trackUri) => {
+    if (!deviceId) return;
+  
+    try {
+      await axios.put(
+        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+        {
+          uris: [trackUri],
+        },
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+      console.log(`Track preloaded: ${trackUri}`);
+    } catch (error) {
+      console.error("Error preloading track:", error.response?.data || error.message);
+    }
+  };
+  
+  
+
   const handleUploadPlaylist = async () => {
+    const validTracks = updatedPlaylist.filter(track => track.uri && track.uri.startsWith('spotify:track:'));
+
+    if (validTracks.length === 0) {
+      alert('Your playlist does not contain any valid Spotify tracks to upload.');
+      return;
+    }
+
     if (!playlistName) {
       alert("Please enter a name for your playlist.");
       return;
@@ -172,7 +255,7 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
       );
 
       const playlistId = createPlaylistResponse.data.id;
-      const trackUris = playlist.map(track => track.uri);
+      const trackUris = updatedPlaylist.map(track => track.uri);
 
       for (let i = 0; i < trackUris.length; i += 100) {
         const urisChunk = trackUris.slice(i, i + 100);
@@ -194,15 +277,126 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
     }
   };
 
+  // Handle AI Prompt Submission
+  const handleAiPromptSubmit = async () => {
+    if (!aiPrompt) {
+      console.error("AI Prompt cannot be empty");
+      return;
+    }
+
+    // Calculate the approximate token usage
+  const estimatedTokens = JSON.stringify(playlist).length + aiPrompt.length;
+  const tokenLimit = 60000; // Adjust this based on your chosen model
+
+  // Check if the input exceeds the token limit
+  if (estimatedTokens > tokenLimit) {
+    alert(
+      `Zoinks. Your playlist is too large for the AI to process and make recs for (translated: I am too broke to afford a more powerful model.)\n\n` +
+      `Please reduce your playlist size or shorten your prompt. Current estimated token usage: ${estimatedTokens} (Limit: ${tokenLimit})`
+    );
+    return;
+  }
+
+    const summarizedPlaylist = updatedPlaylist.slice(0, 5).map(track => ({
+      name: track.name,
+      artist: track.artists?.[0]?.name, // Only include the first artist's name
+    }));
+    
+    const payload = { prompt: aiPrompt, playlist: summarizedPlaylist };
+    console.log('Payload being sent:', payload);
+
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/ai-suggestions`, payload, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      console.log('AI Suggestions response:', response.data);
+       // Ensure suggestions is an array
+      let suggestions = response.data.suggestions;
+      if (typeof suggestions === 'string') {
+        // Split string into array based on newline or specific delimiter
+        suggestions = suggestions.split('\n').filter((line) => line.trim() !== '');
+      }
+
+      setAiSuggestions(suggestions); // Update state with the parsed array
+      
+    } catch (error) {
+      console.error('Error hitting AI Suggestions endpoint:', error.response?.data || error.message);
+      alert('Failed to get suggestions. Please try again.');
+    }
+    
+  };
+
+  const addSuggestionToPlaylist = async (suggestion) => {
+    // Clean up the suggestion string
+    const cleanedSuggestion = suggestion
+      .replace(/^\d+\.\s*/, '') // Remove leading numbering like "1. "
+      .replace(/["']/g, ''); // Remove quotes around the title
+  
+    const parts = cleanedSuggestion.split(' by ');
+    if (parts.length !== 2) {
+      console.error('Invalid suggestion format:', suggestion);
+      alert('Failed to parse suggestion format. Please try another.');
+      return;
+    }
+  
+    const [name, artist] = parts.map((part) => part.trim());
+  
+    try {
+      // Search Spotify for the track
+      const searchResponse = await axios.get('https://api.spotify.com/v1/search', {
+        params: {
+          q: `track:${name} artist:${artist}`,
+          type: 'track',
+          limit: 1,
+        },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+  
+      const track = searchResponse.data.tracks.items[0];
+      if (!track) {
+        alert(`Could not find a match for "${name}" by ${artist} on Spotify.`);
+        return;
+      }
+  
+      // Use the full track details to match the existing playlist structure
+      console.log('Full track details fetched:', track);
+  
+      // Safely update playlist and remove suggestion
+      setUpdatedPlaylist((prevPlaylist) => {
+        const newPlaylist = [...prevPlaylist, track]; // Add the full track object
+        console.log('Updated playlist:', newPlaylist);
+        return newPlaylist;
+      });
+  
+      setAiSuggestions((prevSuggestions) => {
+        const newSuggestions = prevSuggestions.filter((item) => item !== suggestion);
+        console.log('Remaining suggestions:', newSuggestions);
+        return newSuggestions;
+      });
+  
+      console.log('Track added successfully:', track);
+    } catch (error) {
+      console.error('Error adding track:', error.response?.data || error.message);
+      alert('Failed to add track. Please try again.');
+    }
+  };
+  
+  
+  
+  
+
+
   return (
     <div>
       <h1>Your Mixed Playlist</h1>
       <button onClick={onBack}>Back to Search</button>
       
-      {playlist.length > 0 ? (
+      {updatedPlaylist.length > 0 ? (
         <ul>
-          {playlist.map((track, index) => (
-            <li key={`${track.id || track.uri}-${index}`}>
+          {updatedPlaylist.map((track, index) => (
+            <li key={`${track.uri}-${index}`}>
               <button onClick={() => playTrack(track.uri)}>Play</button>
               <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(', ')}
             </li>
@@ -211,6 +405,33 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
       ) : (
         <p>No tracks to display. Please go back and add items to your playlist.</p>
       )}
+
+      {/* AI Feature */}
+      <div>
+        <h2>Sprinkle some AI dust</h2>
+        <input
+          type="text"
+          placeholder="Add some jazz"
+          value={aiPrompt}
+          onChange={(e) => setAiPrompt(e.target.value)}
+        />
+        <button onClick={handleAiPromptSubmit}>Submit</button>
+      </div>
+
+      {aiSuggestions.length > 0 && (
+        <div>
+          <h3>Suggested Additions</h3>
+          <ul>
+            {aiSuggestions.map((item, index) => (
+              <li key={index}>
+                {item}
+                <button onClick={() => addSuggestionToPlaylist(item)}>Add</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
 
       <div>
         <input
@@ -239,7 +460,9 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
           <p><strong>{currentTrack.name}</strong> by {currentTrack.artists.map(artist => artist.name).join(', ')}</p>
         </div>
       )}
+      
     </div>
+    
   );
 };
 

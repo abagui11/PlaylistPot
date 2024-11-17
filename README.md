@@ -24,3 +24,8 @@ A Spotify-connected web application where users can "throw" artists, albums, and
 ```bash
 git clone https://github.com/yourusername/spotify-playlist-mixer.git
 cd spotify-playlist-mixer
+
+### Roadmap
+[X] Adding AI feature to modify playlists
+- Add picture mechanism to create playlist based off picture
+- ability to time capsule back to a specific period in your liked songs (or maybe just a liked songs organizer)

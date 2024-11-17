@@ -10,7 +10,7 @@ function App() {
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
   const [mixedPlaylist, setMixedPlaylist] = useState([]);
-  // const BACKEND_URL="http://localhost:3001"; // Change for production
+  //const BACKEND_URL="http://localhost:3001"; // Change for production
   const BACKEND_URL="https://api.playlistpot.com";
   
   
