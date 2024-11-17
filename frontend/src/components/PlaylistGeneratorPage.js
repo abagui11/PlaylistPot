@@ -13,6 +13,8 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
   const [aiPrompt, setAiPrompt] = useState(''); // For user input AI prompt
   const [aiSuggestions, setAiSuggestions] = useState([]); // To store AI suggestions
   const [updatedPlaylist, setUpdatedPlaylist] = useState(playlist || []); // For dynamically updating the playlist
+  const [searchQuery, setSearchQuery] = useState(''); // New state for search query
+  const [searchResults, setSearchResults] = useState([]); // New state for search results
 
   //const BACKEND_URL = "http://localhost:3001"; // Update for production
   const BACKEND_URL = "https://api.playlistpot.com"; // Update for production
@@ -382,6 +384,50 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
       alert('Failed to add track. Please try again.');
     }
   };
+
+  // Search for songs
+  const searchSongs = async () => {
+    if (!searchQuery.trim()) {
+      alert('Please enter a search query.');
+      return;
+    }
+
+    try {
+      const response = await axios.get('https://api.spotify.com/v1/search', {
+        params: {
+          q: searchQuery,
+          type: 'track',
+          limit: 10,
+        },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setSearchResults(response.data.tracks.items || []);
+      console.log('Search results:', response.data.tracks.items);
+    } catch (error) {
+      console.error('Error searching songs:', error.response?.data || error.message);
+      alert('Failed to search for songs. Please try again.');
+    }
+  };
+
+  // Add a searched song to the playlist
+  const addSearchedSongToPlaylist = (track) => {
+    setUpdatedPlaylist((prevPlaylist) => {
+      const newPlaylist = [...prevPlaylist, track];
+      console.log('Updated playlist after adding searched song:', newPlaylist);
+      return newPlaylist;
+    });
+  };
+
+  // Delete a song from the playlist
+  const deleteSongFromPlaylist = (trackUri) => {
+    setUpdatedPlaylist((prevPlaylist) => {
+      const newPlaylist = prevPlaylist.filter((track) => track.uri !== trackUri);
+      console.log('Updated playlist after deletion:', newPlaylist);
+      return newPlaylist;
+    });
+  };
   
   
   
@@ -399,6 +445,7 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
             <li key={`${track.uri}-${index}`}>
               <button onClick={() => playTrack(track.uri)}>Play</button>
               <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(', ')}
+              <button onClick={() => deleteSongFromPlaylist(track.uri)}>Delete</button>
             </li>
           ))}
         </ul>
@@ -418,7 +465,31 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
           <h3>Now Playing</h3>
           <p><strong>{currentTrack.name}</strong> by {currentTrack.artists.map(artist => artist.name).join(', ')}</p>
         </div>
-      )}  
+      )} 
+       {/* Search Feature */}
+       <div>
+        <h2>Search Songs</h2>
+        <input
+          type="text"
+          placeholder="Search for a song"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <button onClick={searchSongs}>Search</button>
+        {searchResults.length > 0 && (
+          <div>
+            <h3>Search Results</h3>
+            <ul>
+              {searchResults.map((track) => (
+                <li key={track.uri}>
+                  <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(', ')}
+                  <button onClick={() => addSearchedSongToPlaylist(track)}>Add</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
 
       {/* AI Feature */}
       <div>
