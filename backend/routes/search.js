@@ -20,7 +20,7 @@ router.get('/search', async (req, res) => {
         params: {
           q: query,
           type: type, // Pass the filter type directly to Spotify API
-          limit: 10,
+          limit: 5,
         },
       }
     );

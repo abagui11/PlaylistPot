@@ -1,4 +1,4 @@
-// src/components/SearchPage.js
+import '../styles/SearchPage.css';
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -72,39 +72,45 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
   };
 
   return (
-    <div>
-      <h1>Search for Artists, Albums, or Tracks</h1>
-      <input
-        type="text"
-        placeholder="Search..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+    <div className = "search-header">
+      <div className = "search-container"> 
+        <h1>Search for Artists, Albums, or Tracks</h1>
 
-      <div>
-        <label>Filter by: </label>
-        <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-          <option value="artist">Artist</option>
-          <option value="album">Album</option>
-          <option value="track">Track</option>
-        </select>
+        <div className="search-bar-wrapper">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          />
+          <button onClick={handleSearch}>Search</button>
+        </div>
+
+        <div>
+          <label>Filter by: </label>
+          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <option value="artist">Artist</option>
+            <option value="album">Album</option>
+            <option value="track">Track</option>
+          </select>
+        </div>
       </div>
+      
 
-      <button onClick={handleSearch}>Search</button>
-
-      <div>
+      <div className = "results-container">
         <h2>Results</h2>
         <ul>
           {results.map((item) => (
             <li key={item.id}>
               {item.name} - {item.type}
-              <button onClick={() => handleSelectItem(item)}>Add to Pot</button>
+              <button onClick={() => handleSelectItem(item)}>+</button>
             </li>
           ))}
         </ul>
       </div>
 
-      <div>
+      <div className="results-container">
         <h2>Your Pot</h2>
         <ul>
           {selectedItems.map((item, index) => (
@@ -116,19 +122,25 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
         </ul>
       </div>
 
-      <div>
+      <div className="slider-container">
         <label>Number of tracks:</label>
         <input
           type="range"
           min="0"
-          max="500"
+          max="150"
           value={playlistSize}
-          onChange={(e) => setPlaylistSize(parseInt(e.target.value))}
+          onChange={(e) => {
+            const value = e.target.value;
+            e.target.style.setProperty('--value', `${(value / 150) * 100}%`);
+            setPlaylistSize(parseInt(value));
+          }}
+          style={{ '--value': `${(20 / 150) * 100}%` }} // Set the initial value to 20
         />
         <span>{playlistSize}</span>
+        <button onClick={handleMixPlaylist}>Mix</button>
       </div>
 
-      <button onClick={handleMixPlaylist}>Mix Playlist</button>
+      
     </div>
   );
 };

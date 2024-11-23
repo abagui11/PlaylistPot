@@ -1,0 +1,73 @@
+body {
+  margin: 0;
+  font-family: andale mono, Arial, sans-serif;
+  /* Muted dark theme background */
+  background: linear-gradient(26.27deg, #0A0A0A 45.38%, #123524 95.94%, #145A38 106.63%);
+  color: #E0E0E0; /* Muted light text color */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Center the content horizontally */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+  border-radius: 15px;
+  padding: 10px 30px 40px 30px;
+  
+}
+
+.login-container h1 {
+    font-size: 2rem; /* Increase font size */
+    font-weight: bold; /* Make the text bolder */
+    color: transparent; /* Use gradient for text color */
+    background-image: linear-gradient(45deg, #123524, #145A38, #E0E0E0); /* Gradient effect */
+    background-clip: text; /* Clip the background to the text */
+    -webkit-background-clip: text; /* Safari support */
+    text-fill-color: transparent; /* Ensure the text is transparent */
+    -webkit-text-fill-color: transparent; /* Safari support */
+    text-align: center;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8); /* Add depth with a shadow */
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #145A38; /* Add a subtle underline for emphasis */
+}
+
+.login-container h3 {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  color: #CFCFCF; /* Subtle muted light text */
+}
+
+.login-container button {
+  display: flex;
+  align-items: center; /* Align items vertically in the center */
+  justify-content: center; /* Align items horizontally in the center */
+  font-family: proxima nova, sans-serif;
+  color: #E0E0E0; /* Muted light text */
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #123524; /* Pthalo green */
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.login-container button img {
+  height: 20px; /* Set a consistent height for the logo */
+  width: auto; /* Maintain aspect ratio */
+  margin-right: 10px; /* Add some space between the logo and text */
+}
+
+.login-container button:hover {
+  background-color: #145A38; /* Slightly lighter Pthalo green for hover effect */
+  transform: scale(1.05);
+}
+
+.login-container button:active {
+  transform: scale(1);
+}

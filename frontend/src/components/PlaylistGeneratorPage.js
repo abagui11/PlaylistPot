@@ -1,4 +1,4 @@
-// src/components/PlaylistGeneratorPage.js
+import '../styles/PlaylistGeneratorPage.css';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -331,59 +331,66 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
   const addSuggestionToPlaylist = async (suggestion) => {
     // Clean up the suggestion string
     const cleanedSuggestion = suggestion
-      .replace(/^\d+\.\s*/, '') // Remove leading numbering like "1. "
-      .replace(/["']/g, ''); // Remove quotes around the title
-  
-    const parts = cleanedSuggestion.split(' by ');
+        .replace(/^\d+\.\s*/, '') // Remove leading numbering like "1. "
+        .replace(/["“”']/g, '') // Remove quotes or special characters around the title
+        .trim(); // Remove extra whitespace
+
+    console.log('Cleaned Suggestion:', cleanedSuggestion);
+
+    // Split the suggestion into track name and artist
+    const parts = cleanedSuggestion.split(/\s+by\s+/i); // Split on " by " (case-insensitive)
     if (parts.length !== 2) {
-      console.error('Invalid suggestion format:', suggestion);
-      alert('Failed to parse suggestion format. Please try another.');
-      return;
-    }
-  
-    const [name, artist] = parts.map((part) => part.trim());
-  
-    try {
-      // Search Spotify for the track
-      const searchResponse = await axios.get('https://api.spotify.com/v1/search', {
-        params: {
-          q: `track:${name} artist:${artist}`,
-          type: 'track',
-          limit: 1,
-        },
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-  
-      const track = searchResponse.data.tracks.items[0];
-      if (!track) {
-        alert(`Could not find a match for "${name}" by ${artist} on Spotify.`);
+        console.error('Invalid suggestion format:', suggestion);
+        alert('Failed to parse suggestion format. Please try another.');
         return;
-      }
-  
-      // Use the full track details to match the existing playlist structure
-      console.log('Full track details fetched:', track);
-  
-      // Safely update playlist and remove suggestion
-      setUpdatedPlaylist((prevPlaylist) => {
-        const newPlaylist = [...prevPlaylist, track]; // Add the full track object
-        console.log('Updated playlist:', newPlaylist);
-        return newPlaylist;
-      });
-  
-      setAiSuggestions((prevSuggestions) => {
-        const newSuggestions = prevSuggestions.filter((item) => item !== suggestion);
-        console.log('Remaining suggestions:', newSuggestions);
-        return newSuggestions;
-      });
-  
-      console.log('Track added successfully:', track);
-    } catch (error) {
-      console.error('Error adding track:', error.response?.data || error.message);
-      alert('Failed to add track. Please try again.');
     }
-  };
+
+    const [name, artist] = parts.map((part) => part.trim()); // Trim each part
+    console.log('Parsed Name:', name);
+    console.log('Parsed Artist:', artist);
+
+    try {
+        // Search Spotify for the track
+        const searchResponse = await axios.get('https://api.spotify.com/v1/search', {
+            params: {
+                q: `track:${name} artist:${artist}`,
+                type: 'track',
+                limit: 1,
+            },
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+
+        const track = searchResponse.data.tracks.items[0];
+        if (!track) {
+            alert(`Could not find a match for "${name}" by ${artist} on Spotify.`);
+            return;
+        }
+
+        // Use the full track details to match the existing playlist structure
+        console.log('Full track details fetched:', track);
+
+        // Safely update playlist and remove suggestion
+        setUpdatedPlaylist((prevPlaylist) => {
+            const newPlaylist = [...prevPlaylist, track]; // Add the full track object
+            console.log('Updated playlist:', newPlaylist);
+            return newPlaylist;
+        });
+
+        setAiSuggestions((prevSuggestions) => {
+            const newSuggestions = prevSuggestions.filter((item) => item !== suggestion);
+            console.log('Remaining suggestions:', newSuggestions);
+            return newSuggestions;
+        });
+
+        console.log('Track added successfully:', track);
+    } catch (error) {
+        console.error('Error adding track:', error.response?.data || error.message);
+        alert('Failed to add track. Please try again.');
+    }
+};
+
 
   // Search for songs
   const searchSongs = async () => {
@@ -435,55 +442,65 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
 
 
   return (
-    <div>
-      <h1>Your Mixed Playlist</h1>
-      <button onClick={onBack}>Back to Search</button>
-      
-      {updatedPlaylist.length > 0 ? (
-        <ul>
-          {updatedPlaylist.map((track, index) => (
-            <li key={`${track.uri}-${index}`}>
-              <button onClick={() => playTrack(track.uri)}>Play</button>
-              <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(', ')}
-              <button onClick={() => deleteSongFromPlaylist(track.uri)}>Delete</button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No tracks to display. Please go back and add items to your playlist.</p>
-      )}
-
-      <div>
-        <h2>Controls</h2>
-        <button onClick={togglePlay}>{isPlaying ? 'Pause' : 'Play'}</button>
-        <button onClick={skipToNext}>Next</button>
-        <button onClick={toggleShuffle}>Shuffle</button>
+    <div className = "content-wrapper">
+      <button onClick={onBack} className="back-button">Back</button>
+      <div className = "the-pot">
+        
+        <h1>Your Mixed Playlist</h1>
+        
+        
+        {/* Mixed Playlist Section */}
+        {updatedPlaylist.length > 0 ? (
+          <ul>
+            {updatedPlaylist.map((track, index) => (
+              <li key={`${track.uri}-${index}`}>
+                <button onClick={() => playTrack(track.uri)}>Play</button>
+                <button onClick={() => deleteSongFromPlaylist(track.uri)}>X</button>
+                <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(',  ')}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No tracks to display. Please go back and add items to your playlist.</p>
+        )}
       </div>
-
-      {currentTrack && (
+      
+      {/* Controls Section */}
+      <div className = "controls-now-playing-container">
         <div>
-          <h3>Now Playing</h3>
-          <p><strong>{currentTrack.name}</strong> by {currentTrack.artists.map(artist => artist.name).join(', ')}</p>
+          <button onClick={togglePlay}>{isPlaying ? 'Pause' : 'Play'}</button>
+          <button onClick={skipToNext}>Next</button>
+          <button onClick={toggleShuffle}>Shuffle</button>
         </div>
-      )} 
+
+        {currentTrack && (
+          <div>
+            <h3>Now Playing</h3>
+            <p><strong>{currentTrack.name}</strong> by {currentTrack.artists.map(artist => artist.name).join(', ')}</p>
+          </div>
+        )}
+      </div>
        {/* Search Feature */}
-       <div>
-        <h2>Search Songs</h2>
-        <input
-          type="text"
-          placeholder="Search for a song"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <button onClick={searchSongs}>Search</button>
+       <div className = "search-section">
+        <h2>Search songs to add</h2>
+        <div className="input-button-wrapper">
+          <input
+            type="text"
+            placeholder="Search for a song"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button onClick={searchSongs}>Search</button>
+        </div>
         {searchResults.length > 0 && (
           <div>
-            <h3>Search Results</h3>
+            <h2>Search Results</h2>
             <ul>
               {searchResults.map((track) => (
                 <li key={track.uri}>
+                  <button onClick={() => addSearchedSongToPlaylist(track)}>+</button>
                   <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(', ')}
-                  <button onClick={() => addSearchedSongToPlaylist(track)}>Add</button>
+                  
                 </li>
               ))}
             </ul>
@@ -492,15 +509,18 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
       </div>
 
       {/* AI Feature */}
+      <div className = "ai-suggestions-section">
       <div>
-        <h2>ooh aah artificial intelligence</h2>
-        <input
-          type="text"
-          placeholder="Add some jazz"
-          value={aiPrompt}
-          onChange={(e) => setAiPrompt(e.target.value)}
-        />
-        <button onClick={handleAiPromptSubmit}>Submit</button>
+        <h3>AI suggestions</h3>
+        <div className="input-button-wrapper">
+          <input
+            type="text"
+            placeholder="Add some jazz"
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+          />
+          <button onClick={handleAiPromptSubmit}>Submit</button>
+        </div>
       </div>
 
       {aiSuggestions.length > 0 && (
@@ -509,27 +529,30 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
           <ul>
             {aiSuggestions.map((item, index) => (
               <li key={index}>
+                <button onClick={() => addSuggestionToPlaylist(item)}>+</button>
                 {item}
-                <button onClick={() => addSuggestionToPlaylist(item)}>Add</button>
               </li>
             ))}
           </ul>
         </div>
       )}
+      </div>
 
 
-      <div>
+      <div className = "upload-section">
         <h2> Upload your playlist to your Spotify </h2>
-        <input
-          type="text"
-          placeholder="Enter playlist name"
-          value={playlistName}
-          onChange={(e) => setPlaylistName(e.target.value)}
-          disabled={isUploading}
-        />
-        <button onClick={handleUploadPlaylist} disabled={isUploading || !playlist.length}>
-          {isUploading ? 'Uploading...' : 'Upload to Spotify'}
-        </button>
+        <div className="input-button-wrapper">
+          <input
+            type="text"
+            placeholder="Enter playlist name"
+            value={playlistName}
+            onChange={(e) => setPlaylistName(e.target.value)}
+            disabled={isUploading}
+          />
+          <button onClick={handleUploadPlaylist} disabled={isUploading || !playlist.length}>
+            {isUploading ? 'Uploading...' : 'Upload'}
+          </button>
+        </div>
         {uploadStatus && <p>{uploadStatus}</p>}
       </div>
       

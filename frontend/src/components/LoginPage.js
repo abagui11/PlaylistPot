@@ -1,12 +1,16 @@
-// src/components/LoginPage.js
+import '../styles/LoginPage.css';
+import spotifyLogo from 'frontend/src/assets/spotify_logo.png';
 import React from 'react';
 
 const LoginPage = ({ onLogin }) => {
   return (
-    <div>
+    <div className="login-container">
       <h1>Playlist Pot</h1>
-      <h3>Throw your favorite artists, albums, and tracks into the pot and make a playlist out of them easily</h3>
-      <button onClick={onLogin}>Login with Spotify</button>
+      <h3>Make playlists easily</h3>
+      <button className="spotify-button" onClick={onLogin}>
+        <img src={spotifyLogo} alt="Spotify Logo" />
+        Sign in with Spotify
+      </button>
     </div>
   );
 };

@@ -1,0 +1,265 @@
+.content-wrapper {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto; /* Center content horizontally */
+    padding: 20px 100px;
+    overflow-y: auto; /* Allow vertical scrolling for overflow content */
+    height: calc(100vh - 40px); /* Fill the viewport minus padding */
+    background: linear-gradient(26.27deg, #0A0A0A 25.38%, #123524 65.94%, #145A38 106.63%);
+    border-radius: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Add subtle shadow */
+    box-sizing: border-box; /* Include padding in height calculations */
+}
+
+.playlist-generator-page {
+    display: flex;
+    flex-direction: column; /* Arrange children vertically */
+    align-items: center; /* Center horizontally */
+    justify-content: flex-start; /* Align content to the top */
+    padding: 20px;
+    background: #0C0C0C; /* Dark background matching the theme */
+    color: #E0E0E0; /* Muted light text */
+    min-height: 100vh; /* Ensure full height of the viewport */
+    overflow-y: auto; /* Enable scrolling if content exceeds the page height */
+    box-sizing: border-box; /* Include padding in height calculations */
+}
+
+.the-pot {
+    margin: 0 auto; /* Center the container horizontally */
+    background: #0c0c0c; /* Pthalo Green background */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    flex-grow: 1; /* Allow it to grow within its parent */
+    overflow-y: auto; /* Enable vertical scrolling for large lists */
+    max-height: 40vh; /* Set a fixed size to contain results */
+
+    position: relative; /* Position it relative to the results-container */
+    z-index: 10; /* Keep it above the results content */
+    width: 100%; /* Allow it to span the full width */
+}
+
+.the-pot h1 {
+    font-size: 1.5rem;
+    color: #E0E0E0; /* Muted light text */
+    border-bottom: 1px solid #145A38; /* Subtle Pthalo Green underline */
+    padding-bottom: 5px;
+    text-align: center;
+}
+  
+.the-pot ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+}
+  
+.the-pot li {
+    font-size: 0.8rem;
+    color: #E0E0E0; /* Muted light text */
+    padding: 5px 10px;
+    margin: 2px 8px;
+    background-color: #1A1A1A; /* Muted dark list item background */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.the-pot li button {
+    font-size: 0.7rem;
+    margin: 0px 5px;
+    padding: 5px 8px;
+    color: #E0E0E0; /* Muted light text */
+    background-color: #123524; /* Pthalo Green */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.the-pot li button:hover {
+    background-color: #145A38; /* Slightly lighter Pthalo Green */
+    transform: scale(1.05);
+}
+
+.back-button {
+    font-size: 0.7rem;
+    margin: 5px 5px;
+    padding: 5px 8px;
+    color: #E0E0E0; /* Muted light text */
+    background-color: #123524; /* Pthalo Green */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.back-button:hover {
+    background-color: #145A38;
+    transform: scale(1.05);
+}
+
+.controls-now-playing-container {
+    display: flex; /* Arrange the sections inline */
+    align-items: center; /* Vertically align content */
+    justify-content: space-between; /* Add space between sections */
+    gap: 10px; /* Add space between the controls and now playing sections */
+    padding: 10px 20px;
+    max-width: 800px; /* Constrain the width */
+    margin: 20px auto; /* Center horizontally */
+}
+
+.controls-now-playing-container button {
+    font-size: 0.9rem;
+    margin: 0px 5px;
+    padding: 5px 8px;
+    color: #E0E0E0; /* Muted light text */
+    background-color: #123524;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.controls-now-playing-container button:hover {
+    background-color: #145A38;
+}
+
+.search-section,
+.ai-suggestions-section,
+.upload-section {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto; /* Center horizontally with vertical spacing */
+    padding: 20px;
+    background: #0C0C0C; /* Muted dark background */
+    border-radius: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Add depth */
+    border: 1px solid #123524; /* Pthalo Green border */
+    box-sizing: border-box; /* Include padding in size calculations */
+    flex-grow: 1; /* Allow it to grow within its parent */
+    overflow-y: auto; /* Enable vertical scrolling for large lists */
+    max-height: 30vh; /* Set a fixed size to contain results */
+}
+
+.search-section h2,
+.ai-suggestions-section h3,
+.upload-section h2 {
+    font-size: 1.2rem; /* Slightly larger font size */
+    color: #E0E0E0; /* Pthalo Green for section headers */
+    margin-bottom: 15px;
+    text-align: center; /* Center-align the text */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* Subtle shadow for better readability */
+}
+
+/* Flex layout for input and button to span full width */
+.search-section .input-button-wrapper,
+.ai-suggestions-section .input-button-wrapper,
+.upload-section .input-button-wrapper {
+    display: flex; /* Arrange input and button inline */
+    gap: 20px; /* Space between input and button */
+    width: 100%; /* Stretch across the container width */
+}
+
+.search-section input[type="text"],
+.ai-suggestions-section input[type="text"],
+.upload-section input[type="text"] {
+    flex: 3; /* Input takes more space relative to the button */
+    padding: 12px; /* Increase padding for better usability */
+    font-size: 0.8rem; /* Adjust font size */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #1A1A1A; /* Muted dark input background */
+    color: #E0E0E0; /* Muted light text */
+    box-sizing: border-box; /* Ensure consistent sizing */
+}
+
+.search-section button,
+.ai-suggestions-section button,
+.upload-section button {
+    font-size: 0.8rem;
+    margin: 0px 8px;
+    padding: 0px 20px;
+    color: #E0E0E0; /* Muted light text */
+    background-color: #123524;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.search-section button:hover,
+.ai-suggestions-section button:hover,
+.upload-section button:hover {
+    background-color: #145A38;
+}
+
+.search-section ul,
+.ai-suggestions-section ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.search-section li,
+.ai-suggestions-section li {
+    font-size: 0.8rem;
+    color: #E0E0E0; /* Muted light text */
+    padding: 5px 10px;
+    margin: 2px 8px;
+    background-color: #1A1A1A; /* Muted dark list item background */
+    border-radius: 8px;
+    align-items: center;
+    gap: 5px;
+}
+
+.search-section li:hover,
+.ai-suggestions-section li:hover {
+    background-color: #222222; /* Slightly lighter muted background on hover */
+}
+
+.search-section li button,
+.ai-suggestions-section li button {
+    font-size: 0.7rem;
+    margin: 0px 5px;
+    padding: 5px 8px;
+    color: #E0E0E0; /* Muted light text */
+    background-color: #123524; /* Pthalo Green */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.search-section li button:hover,
+.ai-suggestions-section li button:hover {
+    background-color: #145A38; /* Slightly lighter Pthalo Green */
+    transform: scale(1.05);
+}
+
+input[type="text"] {
+    width: calc(100% - 20px);
+    padding: 12px; /* Slightly larger padding */
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #1A1A1A; /* Muted dark background */
+    color: #E0E0E0; /* Muted light text */
+    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.5); /* Add inset shadow for depth */
+}
+
+input[type="text"]:focus {
+    border: 1px solid #123524; /* Pthalo Green border on focus */
+    outline: none; /* Remove default outline */
+}
+
+.upload-status {
+    margin-top: 10px;
+    font-size: 1rem;
+    color: #E0E0E0; /* Muted light text */
+    background-color: #1A1A1A; /* Muted dark background for consistency */
+    padding: 10px; /* Add padding for better visibility */
+    border-radius: 5px; /* Smooth corners */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+}
+
