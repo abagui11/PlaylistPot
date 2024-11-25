@@ -44,6 +44,7 @@
     border-bottom: 1px solid #145A38; /* Subtle Pthalo Green underline */
     padding-bottom: 5px;
     text-align: center;
+    margin: 10px 10px 5px 15px;
 }
   
 .the-pot ul {
@@ -81,6 +82,11 @@
     transform: scale(1.05);
 }
 
+.the-pot p{
+    font-size: 0.7rem;
+    padding: 5px 15px;
+}
+
 .back-button {
     font-size: 0.7rem;
     margin: 5px 5px;
@@ -96,6 +102,30 @@
 .back-button:hover {
     background-color: #145A38;
     transform: scale(1.05);
+}
+
+.clear-playlist-button {
+    font-size: 0.7rem;
+    margin: 5px 10px;
+    padding: 5px 8px;
+    color: #E0E0E0; /* Muted light text */
+    background-color: #123524; /* Pthalo Green */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.clear-playlist-button:hover {
+    background-color: #145A38;
+    transform: scale(1.05);
+}
+
+.playlist-header {
+    display: flex; /* Arrange items horizontally */
+    justify-content: space-between; /* Place title on the left and button on the right */
+    align-items: center; /* Vertically align items */
+    margin-bottom: 10px; /* Add spacing below the header */
 }
 
 .controls-now-playing-container {
@@ -124,13 +154,53 @@
     background-color: #145A38;
 }
 
+/* Style for the playlist dropdown */
+.playlist-dropdown {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.8rem;
+    font-family: andale-mono, monospace;
+    color: #e0e0e0; /* Muted text color */
+    background-color: #1a1a1a; /* Dark background */
+    border: 1px solid #123524; /* Pthalo Green border */
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  /* Hover and focus effects */
+  .playlist-dropdown:focus,
+  .playlist-dropdown:hover {
+    border-color: #145A38; /* Slightly lighter Pthalo Green */
+  }
+  
+  /* Placeholder-like option styling */
+  .playlist-dropdown option {
+    background-color: #1a1a1a; /* Match dropdown background */
+    color: #e0e0e0; /* Muted text color */
+  }
+  
+  /* Style for the "No Playlists Found" message */
+  .no-playlists-message {
+    color: #e0e0e0; /* Muted light text */
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.7rem;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Add subtle shadow */
+  }
+  
+
 .search-section,
 .ai-suggestions-section,
 .upload-section {
     width: 100%;
     max-width: 800px;
     margin: 20px auto; /* Center horizontally with vertical spacing */
-    padding: 20px;
+    padding: 5px 20px;
     background: #0C0C0C; /* Muted dark background */
     border-radius: 15px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Add depth */
@@ -176,11 +246,11 @@
 .search-section button,
 .ai-suggestions-section button,
 .upload-section button {
-    font-size: 0.8rem;
-    margin: 0px 8px;
-    padding: 0px 20px;
+    font-size: 0.7rem;
+    margin: 5px 10px;
+    padding: 5px 8px;
     color: #E0E0E0; /* Muted light text */
-    background-color: #123524;
+    background-color: #123524; /* Pthalo Green */
     border: none;
     border-radius: 5px;
     cursor: pointer;

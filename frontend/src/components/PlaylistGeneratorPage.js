@@ -10,14 +10,31 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
   const [playlistName, setPlaylistName] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
-  const [aiPrompt, setAiPrompt] = useState(''); // For user input AI prompt
-  const [aiSuggestions, setAiSuggestions] = useState([]); // To store AI suggestions
-  const [updatedPlaylist, setUpdatedPlaylist] = useState(playlist || []); // For dynamically updating the playlist
-  const [searchQuery, setSearchQuery] = useState(''); // New state for search query
-  const [searchResults, setSearchResults] = useState([]); // New state for search results
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiSuggestions, setAiSuggestions] = useState([]);
+  const [updatedPlaylist, setUpdatedPlaylist] = useState(playlist || []);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [playlistQuery, setPlaylistQuery] = useState('');
+  const [playlists, setPlaylists] = useState([]);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [playlistTracks, setPlaylistTracks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [averagePopularity, setAveragePopularity] = useState(0);
 
-  //const BACKEND_URL = "http://localhost:3001"; // Update for production
-  const BACKEND_URL = "https://api.playlistpot.com"; // Update for production
+  const BACKEND_URL = "http://localhost:3001"; // Update for production
+  //const BACKEND_URL = "https://api.playlistpot.com"; // Update for production
+
+  // Calculate average popularity dynamically
+  useEffect(() => {
+    if (updatedPlaylist.length === 0) {
+      setAveragePopularity(0); // No tracks, set to 0
+    } else {
+      const totalPopularity = updatedPlaylist.reduce((sum, track) => sum + (track.popularity || 0), 0);
+      const avg = totalPopularity / updatedPlaylist.length;
+      setAveragePopularity(avg.toFixed(2)); // Set with two decimal places
+    }
+  }, [updatedPlaylist]);
 
   useEffect(() => {
     if (!accessToken) return;
@@ -201,24 +218,7 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
     }
   };
 
-  const preloadTrack = async (trackUri) => {
-    if (!deviceId) return;
-  
-    try {
-      await axios.put(
-        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
-        {
-          uris: [trackUri],
-        },
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
-      );
-      console.log(`Track preloaded: ${trackUri}`);
-    } catch (error) {
-      console.error("Error preloading track:", error.response?.data || error.message);
-    }
-  };
+
   
   
 
@@ -435,51 +435,120 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
       return newPlaylist;
     });
   };
-  
-  
-  
-  
 
+  // Fetch user's Spotify playlists
+  const fetchUserPlaylists = async () => {
+    if (!playlistQuery.trim()) return;
+
+    try {
+      setLoading(true);
+      const response = await axios.get('https://api.spotify.com/v1/me/playlists', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        params: { limit: 50 },
+      });
+
+      const filteredPlaylists = response.data.items.filter(playlist =>
+        playlist.name.toLowerCase().includes(playlistQuery.toLowerCase())
+      );
+
+      setPlaylists(filteredPlaylists);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching user playlists:', error.response?.data || error.message);
+      setLoading(false);
+    }
+  };
+
+  // Fetch tracks from a specific playlist
+  const fetchPlaylistTracks = async (playlistId) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        params: { limit: 100 },
+      });
+
+      const tracks = response.data.items.map(item => item.track);
+      setPlaylistTracks(tracks);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching playlist tracks:', error.response?.data || error.message);
+      setLoading(false);
+    }
+  };
+
+  // Add all tracks from the fetched playlist to the current playlist
+  const handleAddAllTracks = () => {
+    setUpdatedPlaylist((prev) => [...prev, ...playlistTracks]);
+    setPlaylistTracks([]); // Clear the suggestions
+  };
+
+  // Add an individual track from the fetched playlist
+  const addFetchedTrackToPlaylist = (track) => {
+    setUpdatedPlaylist((prev) => [...prev, track]);
+    setPlaylistTracks((prev) => prev.filter(t => t.uri !== track.uri));
+  };
+
+  // Render Search Playlists Section
+const renderSearchPlaylistsSection = () => (
+  <div className="search-section">
+    <h2>Search and Add from Playlists</h2>
+    <div className="input-button-wrapper">
+      <input
+        type="text"
+        placeholder="Search for a playlist"
+        value={playlistQuery}
+        onChange={(e) => setPlaylistQuery(e.target.value)}
+      />
+      <button onClick={fetchUserPlaylists} disabled={loading}>
+        {loading ? 'Loading...' : 'Search'}
+      </button>
+    </div>
+
+    {playlists.length > 0 ? (
+      <select
+        onChange={(e) => setSelectedPlaylist(e.target.value)}
+        value={selectedPlaylist || ''}
+        className="playlist-dropdown"
+      >
+        <option value="" disabled>Select a Playlist</option>
+        {playlists.map((playlist) => (
+          <option key={playlist.id} value={playlist.id}>
+            {playlist.name}
+          </option>
+        ))}
+      </select>
+    ) : (
+      <p className="no-playlists-message">No playlists found. Try a different search.</p>
+    )}
+
+    {selectedPlaylist && (
+      <button onClick={() => fetchPlaylistTracks(selectedPlaylist)} disabled={loading}>
+        {loading ? 'Loading Tracks...' : 'Load Playlist Tracks'}
+      </button>
+    )}
+
+    {playlistTracks.length > 0 && (
+      <div>
+        <h3>Tracks in Playlist</h3>
+        <button onClick={handleAddAllTracks}>Add All</button>
+        <ul>
+          {playlistTracks.map((track) => (
+            <li key={track.uri}>
+              <button onClick={() => addFetchedTrackToPlaylist(track)}>+</button>
+              <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(', ')}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+);
 
   return (
     <div className = "content-wrapper">
       <button onClick={onBack} className="back-button">Back</button>
-      <div className = "the-pot">
-        
-        <h1>Your Mixed Playlist</h1>
-        
-        
-        {/* Mixed Playlist Section */}
-        {updatedPlaylist.length > 0 ? (
-          <ul>
-            {updatedPlaylist.map((track, index) => (
-              <li key={`${track.uri}-${index}`}>
-                <button onClick={() => playTrack(track.uri)}>Play</button>
-                <button onClick={() => deleteSongFromPlaylist(track.uri)}>X</button>
-                <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(',  ')}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No tracks to display. Please go back and add items to your playlist.</p>
-        )}
-      </div>
-      
-      {/* Controls Section */}
-      <div className = "controls-now-playing-container">
-        <div>
-          <button onClick={togglePlay}>{isPlaying ? 'Pause' : 'Play'}</button>
-          <button onClick={skipToNext}>Next</button>
-          <button onClick={toggleShuffle}>Shuffle</button>
-        </div>
 
-        {currentTrack && (
-          <div>
-            <h3>Now Playing</h3>
-            <p><strong>{currentTrack.name}</strong> by {currentTrack.artists.map(artist => artist.name).join(', ')}</p>
-          </div>
-        )}
-      </div>
        {/* Search Feature */}
        <div className = "search-section">
         <h2>Search songs to add</h2>
@@ -536,6 +605,74 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
           </ul>
         </div>
       )}
+      </div>
+      
+      {/* Download personal playlist section */}
+      {renderSearchPlaylistsSection()}
+
+
+      <div className = "the-pot">
+
+        {/* Clear Playlist Button */}
+        <div className="playlist-header">
+          <h1>Your Mixed Playlist</h1>
+          <button
+              onClick={() => setUpdatedPlaylist([])}
+              className="clear-playlist-button"
+            >
+              Clear Playlist
+          </button>
+        </div>
+        {/* Mixed Playlist Section */}
+        {updatedPlaylist.length > 0 ? (
+          <ul>
+            {updatedPlaylist.map((track, index) => (
+              <li key={`${track.uri}-${index}`}>
+                <button onClick={() => playTrack(track.uri)}>Play</button>
+                <button onClick={() => deleteSongFromPlaylist(track.uri)}>X</button>
+                <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(',  ')}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No tracks to display. Please go back and add items to your playlist.</p>
+        )}
+      </div>
+      
+      {/* Controls Section */}
+      <div className = "controls-now-playing-container">
+        <div>
+          <button onClick={togglePlay}>{isPlaying ? 'Pause' : 'Play'}</button>
+          <button onClick={skipToNext}>Next</button>
+          <button onClick={toggleShuffle}>Shuffle</button>
+        </div>
+
+        {currentTrack && (
+          <div>
+            <h3>Now Playing</h3>
+            <p><strong>{currentTrack.name}</strong> by {currentTrack.artists.map(artist => artist.name).join(', ')}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Average Popularity Section */}
+      <div className="average-popularity-section">
+        <h2>Normie Score</h2>
+        <p>
+          This playlist is in the {' '}
+          <strong>{averagePopularity}</strong>
+          th percentile of mainstream-ness.
+        </p>
+
+        <p>
+          {averagePopularity <= 30
+            ? "Are these even real songs?"
+            : averagePopularity <= 50
+            ? "Sufficiently niche."
+            : averagePopularity <= 75
+            ? "You probably think you have good music taste"
+            : "Normal and probably mentally stable"}
+        </p>
       </div>
 
 

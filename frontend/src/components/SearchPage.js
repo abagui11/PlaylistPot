@@ -8,9 +8,12 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [filter, setFilter] = useState('artist');
   const [playlistSize, setPlaylistSize] = useState(20);
-  //const BACKEND_URL="http://localhost:3001"; // Change for production
-  const BACKEND_URL="https://api.playlistpot.com";
-  
+
+  const [popularity, setPopularity] = useState(50); // Retain only popularity
+  const [isPopularityEnabled, setIsPopularityEnabled] = useState(false); // Checkbox to enable/disable popularity filter
+
+  const BACKEND_URL = "http://localhost:3001"; // Change for production
+  // const BACKEND_URL="https://api.playlistpot.com";
 
   const handleSearch = async () => {
     if (!query) return;
@@ -23,7 +26,6 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
         },
       });
 
-      // Log the entire response data to inspect its structure
       console.log("API Response:", response.data);
 
       if (filter === 'artist') {
@@ -49,98 +51,139 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
 
   const handleMixPlaylist = async () => {
     if (selectedItems.length === 0) {
-      alert("Please add items to the pot to create a playlist.");
+      alert('Please add items to the pot to create a playlist.');
       return;
     }
 
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/mix-playlist`, {
+      const payload = {
         selectedItems,
         playlistSize,
-      }, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+        // Include popularityValue only if the filter is enabled
+        ...(isPopularityEnabled && { popularityValue: popularity }), // Only include popularity if enabled
+      };
+
+      console.log('Mix Playlist Payload:', payload);
+
+      const response = await axios.post(
+        `${BACKEND_URL}/api/mix-playlist`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       const mixedPlaylist = response.data.tracks;
       onStartSearch(mixedPlaylist);
     } catch (error) {
-      console.error("Error generating mixed playlist:", error);
-      alert("Failed to generate playlist. Please adjust playlist size or add more items to the pot.");
+      console.error('Error generating mixed playlist:', error);
+      alert(
+        'Failed to generate playlist. Please adjust playlist size or add more items to the pot.'
+      );
     }
   };
 
   return (
-    <div className = "search-header">
-      <div className = "search-container"> 
-        <h1>Search for Artists, Albums, or Tracks</h1>
-
-        <div className="search-bar-wrapper">
+    <div className="content-wrapper">
+      <div className="search-header">
+        <div className="slider-container">
+          <label>Number of tracks:</label>
           <input
-            type="text"
-            placeholder="Search..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            type="range"
+            min="0"
+            max="150"
+            value={playlistSize}
+            onChange={(e) => {
+              const value = e.target.value;
+              e.target.style.setProperty('--value', `${(value / 150) * 100}%`);
+              setPlaylistSize(parseInt(value));
+            }}
+            style={{ '--value': `${(20 / 150) * 100}%` }} // Set the initial value to 20
           />
-          <button onClick={handleSearch}>Search</button>
+          <span>{playlistSize}</span>
+          <button onClick={handleMixPlaylist}>MIX</button>
         </div>
 
-        <div>
-          <label>Filter by: </label>
-          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <option value="artist">Artist</option>
-            <option value="album">Album</option>
-            <option value="track">Track</option>
-          </select>
+        <div className="search-container">
+          <h1>Search for Artists, Albums, or Tracks</h1>
+
+          <div className="search-bar-wrapper">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <button onClick={handleSearch}>Search</button>
+          </div>
+
+          <div>
+            <label>Filter by: </label>
+            <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+              <option value="artist">Artist</option>
+              <option value="album">Album</option>
+              <option value="track">Track</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Advanced Tools Section */}
+        <div className="advanced-tools">
+          <div className="audio-feature-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={isPopularityEnabled}
+                onChange={() => setIsPopularityEnabled(!isPopularityEnabled)}
+              />
+              Normie Slider
+            </label>
+            <div className="popularity-slider" style={{ display: isPopularityEnabled ? 'block' : 'none' }}>
+              <div className="slider-labels">
+                <span>Niche</span>
+                <span>Normie</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value={popularity}
+                onChange={(e) => setPopularity(parseInt(e.target.value))}
+                disabled={!isPopularityEnabled}
+              />
+              <span>{popularity}th percentile</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="results-container">
+          <h2>Results</h2>
+          <ul>
+            {results.map((item) => (
+              <li key={item.id}>
+                {item.name} - {item.type}
+                <button onClick={() => handleSelectItem(item)}>+</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="results-container">
+          <h2>Your Pot</h2>
+          <ul>
+            {selectedItems.map((item, index) => (
+              <li key={index}>
+                {item.name} - {item.type}
+                <button onClick={() => handleRemoveItem(index)}>Remove</button>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
-      
-
-      <div className = "results-container">
-        <h2>Results</h2>
-        <ul>
-          {results.map((item) => (
-            <li key={item.id}>
-              {item.name} - {item.type}
-              <button onClick={() => handleSelectItem(item)}>+</button>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="results-container">
-        <h2>Your Pot</h2>
-        <ul>
-          {selectedItems.map((item, index) => (
-            <li key={index}>
-              {item.name} - {item.type}
-              <button onClick={() => handleRemoveItem(index)}>Remove</button> {/* Remove button */}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="slider-container">
-        <label>Number of tracks:</label>
-        <input
-          type="range"
-          min="0"
-          max="150"
-          value={playlistSize}
-          onChange={(e) => {
-            const value = e.target.value;
-            e.target.style.setProperty('--value', `${(value / 150) * 100}%`);
-            setPlaylistSize(parseInt(value));
-          }}
-          style={{ '--value': `${(20 / 150) * 100}%` }} // Set the initial value to 20
-        />
-        <span>{playlistSize}</span>
-        <button onClick={handleMixPlaylist}>Mix</button>
-      </div>
-
-      
     </div>
   );
 };

@@ -10,8 +10,8 @@ function App() {
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
   const [mixedPlaylist, setMixedPlaylist] = useState([]);
-  //const BACKEND_URL="http://localhost:3001"; // Change for production
-  const BACKEND_URL="https://api.playlistpot.com";
+  const BACKEND_URL="http://localhost:3001"; // Change for production
+  //const BACKEND_URL="https://api.playlistpot.com";
   
   
 
@@ -32,6 +32,7 @@ function App() {
     const receiveMessage = (event) => {
       if (event.origin === BACKEND_URL) { // Use dynamic backend URL
         setAccessToken(event.data.accessToken);
+        console.log(event.data.accessToken);
         setIsLoggedIn(true);
         setShowSearch(true);
         setShowPlaylist(false);

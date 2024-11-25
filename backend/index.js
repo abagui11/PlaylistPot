@@ -21,21 +21,21 @@ const PORT = process.env.STATUS === 'development' ? process.env.DEV_PORT: proces
 
 
 app.use(cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-  }));
-
-// Preflight requests handling
-app.options('*', cors({
-  origin: allowedOrigins,
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like Postman or server-to-server calls) and from allowed origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.error(`Blocked by CORS: ${origin}`);
+      callback(new Error(`CORS policy: Origin ${origin} not allowed`));
+    }
+  },
+  credentials: true, // Include credentials like cookies or Authorization headers
 }));
+
+// Simplify preflight handling (optional since CORS middleware already handles this)
+app.options('*', cors());
+
 
 // Use body-parser with increased limit
 app.use(bodyParser.json({ limit: '10mb' })); // Adjust limit as needed

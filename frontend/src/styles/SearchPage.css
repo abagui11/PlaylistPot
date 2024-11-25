@@ -1,3 +1,28 @@
+@media (max-width: 600px) {
+    .content-wrapper {
+      padding: 10px;
+    }
+  
+    .search-bar-wrapper {
+      flex-direction: column;
+      gap: 5px;
+    }
+  }
+  
+
+.content-wrapper {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto; /* Center content horizontally */
+    padding: 20px 100px;
+    overflow-y: auto; /* Allow vertical scrolling for overflow content */
+    height: calc(100vh - 40px); /* Fill the viewport minus padding */
+    background: linear-gradient(26.27deg, #0A0A0A 25.38%, #123524 65.94%, #145A38 106.63%);
+    border-radius: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Add subtle shadow */
+    box-sizing: border-box; /* Include padding in height calculations */
+}
+
 .search-page {
     flex-direction: column;
     height: 100vh; /* Full height of the viewport */
@@ -52,13 +77,13 @@
 }
 
 .search-bar-wrapper button {
-    padding: 10px 20px;
+    padding: 0px 20px;
     background-color: #123524; /* Pthalo Green */
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.8rem;
     transition: background-color 0.3s;
 }
 
@@ -86,20 +111,20 @@
 
 /* Results section */
 .results-container {
+    
+    width: 100%;
+    max-width: 800px;
     flex-grow: 1; /* Allow it to grow within its parent */
     overflow-y: auto; /* Enable vertical scrolling for large lists */
     max-height: 28vh; /* Set a fixed size to contain results */
-    max-width: 800px; /* Match the max-width of search-container */
     margin-top: 20px; /* Add space between search-container and results-container */
     padding: 20px;
     background: #0A0A0A; /* Dark muted background */
     border-radius: 10px;
     box-sizing: border-box; /* Include padding in the height calculation */
     z-index: 5; /* Layer it below the search-container */
-    width: 100%;
     position: relative; /* Ensure it stays in the flow */
-    margin-left: auto; /* Center horizontally */
-    margin-right: auto; /* Center horizontally */
+   
 }
 
 .results-container h2 {
@@ -147,39 +172,35 @@
 .slider-container {
     margin: 20px 0;
     display: flex;
+    flex-direction: column; /* Stack label, slider, and button */
+    gap: 15px;
     align-items: center;
-    gap: 10px;
-    width: 100%;
-    z-index: 2; /* Ensure slider is above the results-container if needed */
-}
-
-.slider-container label {
-    font-size: 1rem;
-    color: #E0E0E0; /* Muted light text */
+    text-align: center;
 }
 
 .slider-container input[type="range"] {
     -webkit-appearance: none;
-    width: 100%;
-    height: 8px;
-    border-radius: 5px;
-    background: linear-gradient(to right, #123524 var(--value, 50%), #fff var(--value, 50%)); /* Left Pthalo Green, right white */
+    width: 100%; /* Full width */
+    height: 12px; /* Larger height */
+    border-radius: 6px;
+    background: linear-gradient(to right, #1A1A1A var(--value, 50%), #333 var(--value, 50%)); /* Darker theme */
     outline: none;
     transition: background 0.3s;
 }
 
 .slider-container input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: #123524; /* Pthalo Green thumb */
+    background: #123524; /* Matches theme */
+    border: 2px solid #fff; /* White outline for better visibility */
     cursor: pointer;
     transition: transform 0.2s;
 }
 
 .slider-container input[type="range"]::-webkit-slider-thumb:hover {
-    transform: scale(1.2); /* Slight enlargement on hover */
+    transform: scale(1.3);
 }
 
 .slider-container span {
@@ -188,16 +209,167 @@
 }
 
 .slider-container button {
-    padding: 5px 10px;
-    background-color: #123524; /* Pthalo Green */
+    padding: 12px 24px;
+    font-size: 1rem;
+    background: linear-gradient(90deg, #145A38, #123524, #145A38);
     color: white;
-    border: none;
-    border-radius: 5px;
+    border: solid;
+    border-color: white;
+    border-width: 1px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 0.8rem;
-    transition: background-color 0.3s;
+    background-size: 200%; /* For moving gradient */
+    animation: shiny-gradient 1.5s infinite linear;
+}
+
+@keyframes shiny-gradient {
+    from {
+        background-position: 0%;
+    }
+    to {
+        background-position: 200%;
+    }
 }
 
 .slider-container button:hover {
-    background-color: #145A38; /* Slightly lighter Pthalo Green */
+    transform: scale(1.1);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
 }
+
+
+/* Self-contained component with flex-grow and overflow */
+.advanced-tools {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(26.27deg, #0A0A0A 45.38%, #123524 120.94%, #145A38 140.63%);
+    gap: 5px;
+    margin: 20px 0;
+    padding: 20px;
+    max-height: 20vh; /* Limit the height */
+    overflow-y: auto; /* Enable scrolling */
+    flex-grow: 1; /* Allow it to grow */
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    width: 100%;
+}
+
+/* Compact slider styling */
+.audio-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+}
+
+.slider-container label {
+    flex: 1; /* Ensure checkboxes align with sliders */
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    color: #E0E0E0;
+}
+
+.slider-container input[type="checkbox"] {
+    accent-color: #123524; /* Match theme */
+}
+
+.slider-container input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%; /* Uniform slider width */
+    height: 6px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #123524 var(--value, 50%), #fff var(--value, 50%));
+    outline: none;
+    transition: background 0.3s;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #123524; /* Pthalo Green thumb */
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1); /* Slight enlargement on hover */
+}
+
+.slider-container span {
+    font-size: 0.8rem;
+    color: #E0E0E0;
+    text-align: right;
+    flex-shrink: 0;
+    width: 40px; /* Fixed width for alignment */
+}
+
+.popularity-slider {
+    display: flex;
+    align-items: center; /* Aligns labels and slider inline */
+    gap: 15px;
+    width: 100%; /* Full width for the slider */
+    justify-content: space-between;
+}
+
+.popularity-slider .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    flex-grow: 1; /* Labels span across the slider */
+    font-size: 0.9rem;
+    color: #E0E0E0;
+    text-align: center;
+}
+
+.popularity-slider input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%; /* Full width of the container */
+    height: 10px; /* Slightly larger slider height */
+    border-radius: 5px;
+    background: linear-gradient(to right, #123524 var(--value, 0%), #1A1A1A var(--value, 0%)); /* Dynamic green-to-dark gradient */
+    outline: none;
+    transition: background 0.3s;
+}
+
+.popularity-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #123524; /* Matches theme */
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.popularity-slider input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.popularity-slider .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+    color: #E0E0E0;
+    text-align: center;
+    width: 100%; /* Full width alignment */
+    margin-bottom: 5px; /* Add some space between labels and slider */
+}
+
+.popularity-slider h2 {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #E0E0E0;
+    margin-bottom: 10px;
+}
+
+
+

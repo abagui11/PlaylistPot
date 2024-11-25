@@ -1,10 +1,42 @@
-// routes/mixPlaylist.js
 const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 
+// Helper Function: Random Sampling
+const getRandomSample = (tracks, sampleSize) => {
+  const shuffled = tracks.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, Math.min(sampleSize, tracks.length));
+};
+
+// Helper Function: Calculate Percentile Threshold
+const calculateThreshold = (tracks, percentile) => {
+  if (tracks.length === 0) return null;
+
+  const popularityValues = tracks.map((track) => track.popularity);
+  const avgPopularity = popularityValues.reduce((sum, val) => sum + val, 0) / popularityValues.length;
+  const stdDev = Math.sqrt(
+    popularityValues.map((val) => Math.pow(val - avgPopularity, 2)).reduce((sum, val) => sum + val, 0) / popularityValues.length
+  );
+
+  const threshold = avgPopularity - (percentile / 100) * stdDev;
+  return Math.max(threshold, 0); // Ensure threshold is not negative
+};
+
+// Helper Function: Filter Tracks for Artists
+const filterArtistTracks = (tracks, percentile) => {
+  if (tracks.length === 0) return [];
+
+  const sampledTracks = getRandomSample(tracks, Math.min(10, tracks.length));
+  const threshold = calculateThreshold(sampledTracks, percentile);
+
+  return tracks.filter((track) => track.popularity <= threshold);
+};
+
+// Mix Playlist Route
 router.post('/mix-playlist', async (req, res) => {
-  const { selectedItems, playlistSize } = req.body;
+  const { selectedItems, playlistSize, popularityValue } = req.body;
+  console.log('Received Mix Playlist Request:', { selectedItems, playlistSize, popularityValue });
+
   const accessToken = req.headers.authorization;
 
   if (!accessToken) {
@@ -12,100 +44,73 @@ router.post('/mix-playlist', async (req, res) => {
   }
 
   try {
-    let playlist = [];
-    let trackPool = {}; // Dictionary to hold track pools for each item by ID
+    let trackPool = {}; // Track pools for each item by ID
+    const playlist = [];
 
-    // Helper function to get an artist's albums and their tracks
-    const fetchAdditionalTracks = async (artistId) => {
-      try {
-        const albumsResponse = await axios.get(
-          `https://api.spotify.com/v1/artists/${artistId}/albums`,
-          { headers: { Authorization: accessToken } }
-        );
+    // Step 1: Include Explicit Tracks from the Pot
+    const explicitTracks = selectedItems.filter((item) => item.type === 'track');
+    playlist.push(...explicitTracks);
 
-        const albums = albumsResponse.data.items;
-        let additionalTracks = [];
+    // Step 2: Allocate Remaining Slots
+    const remainingSize = playlistSize - playlist.length;
+    if (remainingSize <= 0) {
+      return res.json({ tracks: playlist.slice(0, playlistSize) }); // Return if already full
+    }
 
-        for (const album of albums) {
-          const albumTracksResponse = await axios.get(
-            `https://api.spotify.com/v1/albums/${album.id}/tracks`,
-            { headers: { Authorization: accessToken } }
-          );
+    const otherItems = selectedItems.filter((item) => item.type !== 'track');
+    const allocation = Math.floor(remainingSize / otherItems.length);
+    let remainder = remainingSize % otherItems.length;
 
-          additionalTracks = additionalTracks.concat(albumTracksResponse.data.items);
-
-          // Stop fetching if we reach enough tracks for this artist
-          if (additionalTracks.length >= playlistSize) break;
-        }
-
-        return additionalTracks;
-      } catch (error) {
-        console.error(`Error fetching additional tracks for artist ${artistId}:`, error.message);
-        return [];
-      }
-    };
-
-    // Initialize track pools for each artist, album, or track
-    for (const item of selectedItems) {
+    // Step 3: Fetch Tracks for Artists and Albums
+    for (const item of otherItems) {
       if (item.type === 'artist') {
         const response = await axios.get(
           `https://api.spotify.com/v1/artists/${item.id}/top-tracks?market=US`,
           { headers: { Authorization: accessToken } }
         );
-        trackPool[item.id] = response.data.tracks;
-
-        // If more tracks are needed, fetch from artist's albums
-        if (trackPool[item.id].length < playlistSize) {
-          const additionalTracks = await fetchAdditionalTracks(item.id);
-          trackPool[item.id] = trackPool[item.id].concat(additionalTracks);
-        }
+        trackPool[item.id] = response.data.tracks || [];
       } else if (item.type === 'album') {
         const response = await axios.get(
           `https://api.spotify.com/v1/albums/${item.id}/tracks`,
           { headers: { Authorization: accessToken } }
         );
-        trackPool[item.id] = response.data.items;
-      } else if (item.type === 'track') {
-        trackPool[item.id] = [item];
+        trackPool[item.id] = response.data.items || [];
       }
     }
 
-    // Round-robin selection of tracks to reach desired playlist size
-    while (playlist.length < playlistSize) {
-      let itemsExhausted = true;
+    // Step 4: Add Tracks for Albums and Artists
+    for (const item of otherItems) {
+      let tracksToAdd = allocation + (remainder > 0 ? 1 : 0);
+      remainder = Math.max(remainder - 1, 0);
 
-      for (const item of selectedItems) {
-        const trackList = trackPool[item.id];
+      if (item.type === 'album') {
+        // Add all album tracks up to the allocated number
+        const albumTracks = trackPool[item.id].slice(0, tracksToAdd);
+        playlist.push(...albumTracks);
+      } else if (item.type === 'artist') {
+        // Filter artist tracks based on popularity
+        const artistTracks = filterArtistTracks(trackPool[item.id], popularityValue || 100);
+        const selectedTracks = artistTracks.slice(0, tracksToAdd); // Take up to allocated number
+        playlist.push(...selectedTracks);
+      }
+    }
 
-        if (!trackList || trackList.length === 0) {
-          // If no tracks left for this item, skip to the next item in the round
-          continue;
-        }
+    // Step 5: Handle Insufficient Tracks
+    if (playlist.length < playlistSize) {
+      console.warn('Not enough unique tracks to meet the desired playlist size. Filling remainder.');
 
-        // Select a random track from the trackList and add it to the playlist
-        const randomIndex = Math.floor(Math.random() * trackList.length);
-        const track = trackList.splice(randomIndex, 1)[0]; // Remove and get the track
-        playlist.push(track);
-        itemsExhausted = false; // Set to false if any item has tracks left
+      for (const item of otherItems) {
+        const remainingTracks = trackPool[item.id];
+        const extraTracks = remainingTracks.slice(0, playlistSize - playlist.length);
+        playlist.push(...extraTracks);
 
-        // Check if we've reached the desired playlist size
         if (playlist.length >= playlistSize) break;
       }
-
-      // If all items are exhausted and we can't fill the playlist size, stop
-      if (itemsExhausted) break;
     }
 
-    // Final check for playlist length
-    if (playlist.length < playlistSize) {
-      return res.status(400).json({
-        error: 'Not enough unique tracks to meet the desired playlist size. Add more items or reduce the playlist size.',
-      });
-    }
-
-    res.json({ tracks: playlist });
+    res.json({ tracks: playlist.slice(0, playlistSize) }); // Return final playlist
   } catch (error) {
-    console.error("Error generating mixed playlist:", error);
+    console.error('Error generating mixed playlist:', error.message);
     res.status(500).json({ error: 'Failed to generate mixed playlist' });
   }
 });
