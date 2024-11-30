@@ -9,6 +9,7 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
   const [aiPrompt, setAiPrompt] = useState('');
   const [filter, setFilter] = useState('artist');
   const [playlistSize, setPlaylistSize] = useState(20);
+  const [draggedItem, setDraggedItem] = useState(null);
 
   const [placeholder, setPlaceholder] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,8 +23,8 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
   ];
 
 
-  //const BACKEND_URL = "http://localhost:3001"; // Change for production
-  const BACKEND_URL="https://api.playlistpot.com";
+  const BACKEND_URL = "http://localhost:3001"; // Change for production
+  //const BACKEND_URL="https://api.playlistpot.com";
 
   const handleSearch = async () => {
     if (!query) return;
@@ -48,6 +49,31 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
     } catch (error) {
       console.error("Error fetching search results:", error);
     }
+  };
+
+  // Drag event handlers for results
+  const handleDragStart = (item) => {
+    setDraggedItem(item);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Allow drop by preventing default behavior
+  };
+
+  const handleDropToPot = () => {
+    if (draggedItem) {
+      setSelectedItems((prev) => [...prev, draggedItem]);
+      setResults((prevResults) =>
+        prevResults.filter((result) => result.id !== draggedItem.id)
+      );
+      setDraggedItem(null); // Clear the dragged item
+    }
+  };
+
+  // Drag event handlers for removing from pot
+  const handleDropRemoveFromPot = (item) => {
+    setSelectedItems((prev) => prev.filter((i) => i.id !== item.id));
+    setResults((prevResults) => [...prevResults, item]);
   };
 
   const handleSelectItem = (item) => {
@@ -246,31 +272,6 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
 
   return (
     <div className="content-wrapper">
-      
-      <div className="mix-section">
-        <label htmlFor="playlist-size">Set playlist size:</label>
-        <input
-          id="playlist-size"
-          type="number"
-          min="1"
-          max="150"
-          value={playlistSize}
-          onChange={(e) => {
-            const value = parseInt(e.target.value, 10);
-            if (value < 1) {
-              alert('Please increase the playlist size. The minimum size is 1.');
-              setPlaylistSize(1); // Reset to minimum
-            } else if (value > 150) {
-              alert('The maximum playlist size is 150.');
-              setPlaylistSize(150); // Reset to maximum
-            } else {
-              setPlaylistSize(value);
-            }
-          }}
-        />
-        <button onClick={handleMixPlaylist}>MIX</button>
-      </div>
-
 
       <div className="search-container">
         <h1>Add Artists, Albums, or Tracks to Pot</h1>
@@ -286,7 +287,7 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
           <button onClick={handleSearch}>Search</button>
         </div>
 
-        <div>
+        <div className = "filter">
           <label>Filter by: </label>
           <select value={filter} onChange={(e) => setFilter(e.target.value)}>
             <option value="artist">Artist</option>
@@ -318,11 +319,16 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
         
         <div className="results-pot-container">
 
-          <div className="results-container">
+          <div className="results-container"
+          onDragOver={handleDragOver}>
             <h2>Results</h2>
             <ul>
-              {results.map((item) => (
-                <li key={item.id}>
+            {results.map((item) => (
+              <li
+                key={item.id}
+                draggable
+                onDragStart={() => handleDragStart(item)}
+              >
                   {item.name} - {item.type}
                   <button onClick={() => handleSelectItem(item)}>+</button>
                 </li>
@@ -330,11 +336,18 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
             </ul>
           </div>
 
-          <div className="pot-container">
+          <div className="pot-container"
+          onDragOver={handleDragOver}
+          onDrop={handleDropToPot}>
             <h2>Your Pot</h2>
             <ul>
               {selectedItems.map((item, index) => (
-                <li key={index}>
+                <li
+                key={item.id}
+                draggable
+                onDragStart={() => handleDragStart(item)}
+                onDrop={() => handleDropRemoveFromPot(item)}
+              >
                   {item.name} - {item.type}
                   <button onClick={() => handleRemoveItem(index)}>x</button>
                 </li>
@@ -342,6 +355,30 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
             </ul>
           </div>
         </div>
+        <div className="mix-section">
+        <label htmlFor="playlist-size">Set playlist size:</label>
+        <input
+          id="playlist-size"
+          type="number"
+          min="1"
+          max="150"
+          value={playlistSize}
+          onChange={(e) => {
+            const value = parseInt(e.target.value, 10);
+            if (value < 1) {
+              alert('Please increase the playlist size. The minimum size is 1.');
+              setPlaylistSize(1); // Reset to minimum
+            } else if (value > 150) {
+              alert('The maximum playlist size is 150.');
+              setPlaylistSize(150); // Reset to maximum
+            } else {
+              setPlaylistSize(value);
+            }
+          }}
+        />
+        <button onClick={handleMixPlaylist}>MIX</button>
+      </div>
+
       </div>
 
     

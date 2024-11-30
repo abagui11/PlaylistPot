@@ -10,38 +10,46 @@ function App() {
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
   const [mixedPlaylist, setMixedPlaylist] = useState([]);
-  //const BACKEND_URL="http://localhost:3001"; // Change for production
-  const BACKEND_URL="https://api.playlistpot.com";
-  
+  const [isLoading, setIsLoading] = useState(false);
+  const BACKEND_URL="http://localhost:3001"; // Change for production
+  //const BACKEND_URL="https://api.playlistpot.com";
   
 
   const handleLogin = () => {
-    console.log(BACKEND_URL);
-    const width = 500;
-    const height = 600;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
-    window.open(
-      `${BACKEND_URL}/api/auth/login`, // Use dynamic backend URL
-      '_blank',
-      `width=${width},height=${height},top=${top},left=${left}`
-    );
+  setIsLoading(true);
+  const width = 500;
+  const height = 600;
+  const left = window.screen.width / 2 - width / 2;
+  const top = window.screen.height / 2 - height / 2;
+
+  const loginPopup = window.open(
+    `${BACKEND_URL}/api/auth/login`, // Use dynamic backend URL
+    '_blank',
+    `width=${width},height=${height},top=${top},left=${left}`
+  );
+
+  if (!loginPopup || loginPopup.closed || typeof loginPopup.closed === 'undefined') {
+    // Popup blocked or failed, fallback to redirect
+    setIsLoading(false);
+    window.location.href = `${BACKEND_URL}/api/auth/login`;
+  }
+};
+
+useEffect(() => {
+  const receiveMessage = (event) => {
+    if (event.origin === BACKEND_URL) { // Use dynamic backend URL
+      setAccessToken(event.data.accessToken);
+      setIsLoggedIn(true);
+      setShowSearch(true);
+      setShowPlaylist(false);
+      setIsLoading(false);
+    }
   };
 
-  useEffect(() => {
-    const receiveMessage = (event) => {
-      if (event.origin === BACKEND_URL) { // Use dynamic backend URL
-        setAccessToken(event.data.accessToken);
-        console.log(event.data.accessToken);
-        setIsLoggedIn(true);
-        setShowSearch(true);
-        setShowPlaylist(false);
-      }
-    };
+  window.addEventListener('message', receiveMessage);
+  return () => window.removeEventListener('message', receiveMessage);
+}, []);
 
-    window.addEventListener('message', receiveMessage);
-    return () => window.removeEventListener('message', receiveMessage);
-  });
 
   const handleSearch = (playlist) => {
     setMixedPlaylist(playlist);
@@ -57,16 +65,20 @@ function App() {
   return (
     <div className="App">
       {!isLoggedIn ? (
-        <LoginPage onLogin={handleLogin} />
-      ) : showSearch ? (
-        <SearchPage onStartSearch={handleSearch} accessToken={accessToken} />
-      ) : showPlaylist ? (
-        <PlaylistGeneratorPage
-          playlist={mixedPlaylist}
-          onBack={handleBackToSearch}
-          accessToken={accessToken}
-        />
-      ) : null}
+  isLoading ? (
+    <div>Loading...</div>
+  ) : (
+    <LoginPage onLogin={handleLogin} />
+  )
+) : showSearch ? (
+  <SearchPage onStartSearch={handleSearch} accessToken={accessToken} />
+) : showPlaylist ? (
+  <PlaylistGeneratorPage
+    playlist={mixedPlaylist}
+    onBack={handleBackToSearch}
+    accessToken={accessToken}
+  />
+) : null}
     </div>
   );
 }

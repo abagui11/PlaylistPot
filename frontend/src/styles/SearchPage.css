@@ -1,23 +1,10 @@
-@media (max-width: 600px) {
-    .content-wrapper {
-      padding: 10px;
-    }
-  
-    .search-bar-wrapper {
-      flex-direction: column;
-      gap: 5px;
-    }
-  }
-  
-
 .content-wrapper {
     display: flex;
     flex-direction: column;
     width: 100%;
     max-width: 800px; /* Ensure it's wide enough for the inline layout */
     margin: 0 auto;
-
-    padding: 20px 100px;
+    padding: 20px;
     overflow-y: auto; /* Allow vertical scrolling for overflow content */
     height: calc(100vh - 40px); /* Fill the viewport minus padding */
     background: linear-gradient(26.27deg, #0A0A0A 25.38%, #123524 65.94%, #145A38 106.63%);
@@ -79,21 +66,22 @@
 
 
 /* Overall container for centering and spacing */
-.search-container {
+.search-container, .ai-container {
     display: flex;
     flex-direction: column; /* Stack items vertically */
     align-items: center; /* Center items horizontally */
-    justify-content: space-between; /* Space out input and button */
+    justify-content: center; /* Space out input and button */
     padding: 20px;
     max-width: 800px;
     margin: 0 auto; /* Center the container horizontally */
     background: linear-gradient(26.27deg, #0A0A0A 45.38%, #123524 120.94%, #145A38 140.63%);
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
     border-radius: 15px;
-
-    position: relative; /* Position it relative to the results-container */
-    z-index: 10; /* Keep it above the results content */
-    width: 100%; /* Allow it to span the full width */
+    width: 100%; /* Full width for parent alignment */
+    max-width: 600px; /* Same max-width for all containers */
+    padding: 20px; /* Internal spacing */
+    margin: 20px auto; /* Center horizontally with spacing between containers */
+    box-sizing: border-box; /* Consistent sizing */
 }
 
 /* Header styles */
@@ -157,24 +145,7 @@
     border: 2px solid #123524; /* Pthalo Green focus border */
 }
 
-/*AI Suggestions Section*/
 
-.ai-container {
-    display: flex;
-    flex-direction: column; /* Stack items vertically */
-    align-items: center; /* Center items horizontally */
-    justify-content: space-between; /* Space out input and button */
-    padding: 20px;
-    max-width: 800px;
-    margin: 20px auto; /* Center the container horizontally */
-    background: linear-gradient(26.27deg, #0A0A0A 45.38%, #123524 120.94%, #145A38 140.63%);
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
-    border-radius: 15px;
-
-    position: relative; /* Position it relative to the results-container */
-    z-index: 10; /* Keep it above the results content */
-    width: 100%; /* Allow it to span the full width */
-}
 
 .ai-container p{
     font-size: 0.8rem;
@@ -184,24 +155,16 @@
 }
 
 /* Results section */
-.results-container, .pot-container {
-    align-items: center;
-    justify-content: center; /* Centers horizontally */
-    margin: 0 auto;
-    gap: 10px; /* Spacing between elements */
-    margin: 5px 10px 20px 5px;
-    flex-grow: 1; /* Allow it to grow within its parent */
-    overflow-y: auto; /* Enable vertical scrolling for large lists */
-    max-height: 28vh; /* Set a fixed size to contain results */
-    margin-top: 20px; /* Add space between search-container and results-container */
-    padding: 20px;
-    background: #0A0A0A; /* Dark muted background */
-    border-radius: 10px;
-    box-sizing: border-box; /* Include padding in the height calculation */
-    z-index: 5; /* Layer it below the search-container */
-    position: relative; /* Ensure it stays in the flow */
-   
-}
+  /* Individual containers */
+  .results-container, .pot-container {
+    flex: 1; /* Let both containers take up equal space */
+    max-width: 50%; /* Restrict each to half of the available width */
+    padding: 20px; /* Add padding inside the containers */
+    box-sizing: border-box; /* Ensure padding doesn’t overflow */
+    background: #0A0A0A; /* Background color matching theme */
+    border-radius: 10px; /* Rounded corners */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+  }
 
 .results-container h2, .pot-container  h2 {
     font-size: 1.5rem;
@@ -257,27 +220,170 @@
     
   }
   
-  /* Individual containers */
+
+  
+/* Mobile-specific styles for screens 600px or smaller */
+/* Mobile-specific styles for screens 600px or smaller */
+@media (max-width: 600px) {
+  /* General container adjustments */
+  .content-wrapper {
+    padding: 10px; /* Reduce padding for small screens */
+    height: 100vh; /* Make it exactly the height of the viewport */
+    max-width: 100%; /* Remove the max-width restriction */
+    border-radius: 0; /* Remove rounded corners for a full-width look */
+    overflow-y: auto; /* Ensure scrolling is allowed if content overflows */
+    margin: 0; /* Remove horizontal centering on small screens */
+  }
+
+  .search-container, .ai-container{
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center items horizontally */
+    justify-content: space-between; /* Space out input and button */
+    background: linear-gradient(26.27deg, #0A0A0A 45.38%, #123524 120.94%, #145A38 140.63%);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    position: relative; /* Position it relative to the results-container */
+    z-index: 10; /* Keep it above the results content */
+    max-width: 100%; /* Remove the width restriction */
+    width: 100%; /* Ensure it spans the full width of the viewport */
+    margin: 10px auto; /* Remove horizontal centering */
+  
+  }
+
+  .search-container h1, .ai-container h1 {
+    font-family: andale-mono, monospace;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    color: #E0E0E0; /* Muted light text */
+    text-align: center;
+}
+
+.search-bar-wrapper input[type="text"] , .ai-container input[type="text"] {
+  width: 90%; /* Make the input span most of the screen */
+  max-width: 500px; /* Limit maximum width */
+  margin: 0 auto; /* Center horizontally */
+  padding: 10px; /* Ensure adequate padding */
+  font-size: 0.8rem; /* Adjust font size for better readability */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #1A1A1A; /* Muted dark input background */
+  color: #E0E0E0; /* Muted light text */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+
+  /* Stack search and results vertically */
+  .results-pot-container {
+    flex-direction: column; /* Stack items vertically */
+    gap: 10px; /* Add space between stacked items */
+  }
+
   .results-container, .pot-container {
-    flex: 1; /* Let both containers take up equal space */
-    max-width: 50%; /* Restrict each to half of the available width */
-    padding: 20px; /* Add padding inside the containers */
-    box-sizing: border-box; /* Ensure padding doesn’t overflow */
-    background: #0A0A0A; /* Background color matching theme */
-    border-radius: 10px; /* Rounded corners */
-    overflow-y: auto; /* Enable scrolling if content overflows */
+    width: 100%; /* Full width of the parent */
+    max-width: 100%; /* Remove the max-width restriction */
+    padding: 10px;
+    font-size: 0.9rem; /* Slightly smaller text for mobile */
   }
-  
-  /* Ensure they stack vertically on smaller screens */
-  @media (max-width: 600px) {
-    .results-pot-container {
-      flex-direction: column; /* Stack items vertically */
-    }
-  
-    .results-container, .pot-container {
-      max-width: 100%; /* Full width for each container */
-    }
+
+  /* Reduce header sizes for better spacing */
+  h1 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
   }
+
+  h2 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+    text-align: center; /* Center-align headers */
+  }
+
+  /* Dropdown adjustments */
+  .search-container select {
+    font-size: 0.9rem; /* Slightly smaller for mobile */
+    width: 50%; /* Ensure it spans full width */
+    padding: 5px;
+    margin: 0 auto 0 auto;
+  }
+  .filter {
+    font-size: 0.65rem;
+    display: flex; /* Use flexbox for inline layout */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Align vertically */
+    gap: 10px; /* Add space between label and dropdown */
+    margin: 0 auto; /* Center the container itself */
+    width: 100%; /* Optional: Let it take the full width of its parent */
+    text-align: center; /* Center text inside the container */
+  }
+
+  /* Buttons should have consistent size and padding */
+  .search-bar-wrapper button,
+  .mix-section button {
+    margin: 5px auto 10px auto;
+    padding: 5px 10px;
+    font-size: 0.7rem;
+    width: 100%; /* Ensure buttons adjust to content */
+  }
+
+  .results-container li button,
+  .pot-container li button {
+    margin: 5px 0 10px auto;
+    padding: 5px 10px;
+    font-size: 0.7rem;
+    width: 15%; /* Ensure buttons adjust to content */
+  }
+
+  /* Input fields should also fit mobile */
+  .search-bar-wrapper input[type="text"],
+  .mix-section input {
+    font-size: 0.8rem;
+    padding: 8px;
+    width: 100%; /* Full width on mobile */
+  }
+
+  /* Search bar and dropdown adjustments */
+  .search-bar-wrapper {
+    flex-direction: column; /* Stack input and button */
+    gap: 8px; /* Add space between elements */
+  }
+
+  /* AI suggestions adjustments */
+  .ai-container {
+    padding: 10px;
+    font-size: 0.9rem; /* Adjust text size */
+  }
+
+  /* Results container adjustments */
+  .results-container, .pot-container {
+    padding: 10px;
+    max-height: none; /* Allow full height for better usability */
+    margin: 0; /* Remove additional margins */
+    border-radius: 15px; /* Remove rounded corners for a flush appearance */
+  }
+
+  .results-pot-container h2{
+    font-size: 1rem;
+  }
+
+  /* Reduce margins for smaller screens */
+  .results-container ul, .pot-container ul {
+    margin: 5px 0;
+
+  }
+
+  /* Ensure the list items are properly sized */
+  .results-container li, .pot-container li {
+    font-size: 0.7rem;
+    padding: 8px;
+    margin-bottom: 5px;
+  }
+
+  .mix-section label{
+    font-size:0.65rem;
+  }
+}
+
+
   
 
 
