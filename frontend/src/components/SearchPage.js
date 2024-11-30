@@ -23,8 +23,8 @@ const SearchPage = ({ onStartSearch, accessToken }) => {
   ];
 
 
-  const BACKEND_URL = "http://localhost:3001"; // Change for production
-  //const BACKEND_URL="https://api.playlistpot.com";
+  //const BACKEND_URL = "http://localhost:3001"; // Change for production
+  const BACKEND_URL="https://api.playlistpot.com";
 
   const handleSearch = async () => {
     if (!query) return;

@@ -23,8 +23,8 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
   const [averagePopularity, setAveragePopularity] = useState(0);
   const [searchAttempted, setSearchAttempted] = useState(false);
 
-  const BACKEND_URL = "http://localhost:3001"; // Update for production
-  //const BACKEND_URL = "https://api.playlistpot.com"; // Update for production
+  //const BACKEND_URL = "http://localhost:3001"; // Update for production
+  const BACKEND_URL = "https://api.playlistpot.com"; // Update for production
 
   // Calculate average popularity dynamically
   useEffect(() => {
