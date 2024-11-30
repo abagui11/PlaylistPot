@@ -11,31 +11,22 @@
     box-sizing: border-box; /* Include padding in height calculations */
 }
 
-.playlist-generator-page {
-    display: flex;
-    flex-direction: column; /* Arrange children vertically */
-    align-items: center; /* Center horizontally */
-    justify-content: flex-start; /* Align content to the top */
-    padding: 20px;
-    background: #0C0C0C; /* Dark background matching the theme */
-    color: #E0E0E0; /* Muted light text */
-    min-height: 100vh; /* Ensure full height of the viewport */
-    overflow-y: auto; /* Enable scrolling if content exceeds the page height */
-    box-sizing: border-box; /* Include padding in height calculations */
-}
 
 .the-pot {
-    margin: 0 auto; /* Center the container horizontally */
-    background: #0c0c0c; /* Pthalo Green background */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 800px; /* Ensure they don't stretch beyond this width */
+    margin: 20px auto; /* Center horizontally with vertical spacing */
+    padding: 10px 20px; /* Add consistent padding */
+    background: #0C0C0C; /* Muted dark background */
     border-radius: 15px;
-    flex-grow: 1; /* Allow it to grow within its parent */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Add subtle shadow */
+    border: 1px solid #123524; /* Pthalo Green border */
+    box-sizing: border-box; /* Include padding in size calculations */
+    flex-grow: 1; /* Allow it to grow dynamically within its parent */
     overflow-y: auto; /* Enable vertical scrolling for large lists */
-    max-height: 40vh; /* Set a fixed size to contain results */
-
-    position: relative; /* Position it relative to the results-container */
-    z-index: 10; /* Keep it above the results content */
-    width: 100%; /* Allow it to span the full width */
+    min-height: 40vh; /* Minimum height for better usability */
+    height: auto; /* Allow it to grow based on content */
+    max-height: 70vh; /* Adjust this value to set a larger limit */
 }
 
 .the-pot h1 {
@@ -121,12 +112,7 @@
     transform: scale(1.05);
 }
 
-.playlist-header {
-    display: flex; /* Arrange items horizontally */
-    justify-content: space-between; /* Place title on the left and button on the right */
-    align-items: center; /* Vertically align items */
-    margin-bottom: 10px; /* Add spacing below the header */
-}
+
 
 .controls-now-playing-container {
     display: flex; /* Arrange the sections inline */
@@ -194,22 +180,30 @@
   }
   
 
-.search-section,
-.ai-suggestions-section,
-.upload-section {
-    width: 100%;
-    max-width: 800px;
-    margin: 20px auto; /* Center horizontally with vertical spacing */
-    padding: 5px 20px;
-    background: #0C0C0C; /* Muted dark background */
-    border-radius: 15px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Add depth */
-    border: 1px solid #123524; /* Pthalo Green border */
-    box-sizing: border-box; /* Include padding in size calculations */
-    flex-grow: 1; /* Allow it to grow within its parent */
-    overflow-y: auto; /* Enable vertical scrolling for large lists */
-    max-height: 30vh; /* Set a fixed size to contain results */
-}
+  .search-section,
+  .ai-suggestions-section,
+  .upload-section {
+      width: 100%;
+      max-width: 800px; /* Ensure they don't stretch beyond this width */
+      margin: 20px auto; /* Center horizontally with vertical spacing */
+      padding: 10px 20px; /* Add consistent padding */
+      background: #0C0C0C; /* Muted dark background */
+      border-radius: 15px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Add subtle shadow */
+      border: 1px solid #123524; /* Pthalo Green border */
+      box-sizing: border-box; /* Include padding in size calculations */
+      display: flex; /* Use flexbox to manage layout */
+      flex-direction: column; /* Stack children vertically */
+      overflow-y: auto; /* Enable vertical scrolling for large lists */
+      min-height: 20vh; /* Set a reasonable minimum height */
+      max-height: 60vh; /* Set a maximum height for larger content */
+      height: auto; /* Allow the section to adapt to content */
+      flex-shrink: 0; /* Prevent shrinking when parent space is constrained */
+      flex-grow: 1; /* Allow the section to grow with content */
+  }
+  
+
+  
 
 .search-section h2,
 .ai-suggestions-section h3,

@@ -11,9 +11,12 @@
   
 
 .content-wrapper {
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    max-width: 800px;
-    margin: 0 auto; /* Center content horizontally */
+    max-width: 800px; /* Ensure it's wide enough for the inline layout */
+    margin: 0 auto;
+
     padding: 20px 100px;
     overflow-y: auto; /* Allow vertical scrolling for overflow content */
     height: calc(100vh - 40px); /* Fill the viewport minus padding */
@@ -23,12 +26,57 @@
     box-sizing: border-box; /* Include padding in height calculations */
 }
 
-.search-page {
-    flex-direction: column;
-    height: 100vh; /* Full height of the viewport */
-    overflow: hidden; /* Prevents the page from scrolling */
-    position: relative; /* Keeps everything positioned within the page */
-}
+.mix-section {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centers horizontally */
+    margin: 0 auto;
+    gap: 10px; /* Spacing between elements */
+    margin: 5px 10px 20px 5px;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .mix-section label {
+    color: #FFFFFF; /* White text for contrast */
+    font-size: 14px;
+  }
+  
+  .mix-section input {
+    text-align: center;
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #123524; /* Match theme */
+    border-radius: 5px;
+    background-color: #0A0A0A;
+    color: #FFFFFF; /* White text for input */
+  }
+  
+  .mix-section input:focus {
+    outline: none;
+    border-color: #145A38; /* Highlight color on focus */
+    box-shadow: 0 0 5px #145A38;
+  }
+  
+  .mix-section button {
+    height: 30px;
+    padding: 0 15px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFFFFF; /* White text for button */
+    background-color: #123524;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .mix-section button:hover {
+    background-color: #145A38; /* Slightly lighter green on hover */
+  }
+  
+
+
 
 /* Overall container for centering and spacing */
 .search-container {
@@ -51,7 +99,7 @@
 /* Header styles */
 .search-container h1 {
     font-family: andale-mono, monospace;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     margin-bottom: 15px;
     color: #E0E0E0; /* Muted light text */
     text-align: center;
@@ -109,11 +157,39 @@
     border: 2px solid #123524; /* Pthalo Green focus border */
 }
 
-/* Results section */
-.results-container {
-    
-    width: 100%;
+/*AI Suggestions Section*/
+
+.ai-container {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center items horizontally */
+    justify-content: space-between; /* Space out input and button */
+    padding: 20px;
     max-width: 800px;
+    margin: 20px auto; /* Center the container horizontally */
+    background: linear-gradient(26.27deg, #0A0A0A 45.38%, #123524 120.94%, #145A38 140.63%);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+
+    position: relative; /* Position it relative to the results-container */
+    z-index: 10; /* Keep it above the results content */
+    width: 100%; /* Allow it to span the full width */
+}
+
+.ai-container p{
+    font-size: 0.8rem;
+    align-items: left;
+    justify-content: left;
+    
+}
+
+/* Results section */
+.results-container, .pot-container {
+    align-items: center;
+    justify-content: center; /* Centers horizontally */
+    margin: 0 auto;
+    gap: 10px; /* Spacing between elements */
+    margin: 5px 10px 20px 5px;
     flex-grow: 1; /* Allow it to grow within its parent */
     overflow-y: auto; /* Enable vertical scrolling for large lists */
     max-height: 28vh; /* Set a fixed size to contain results */
@@ -127,20 +203,20 @@
    
 }
 
-.results-container h2 {
+.results-container h2, .pot-container  h2 {
     font-size: 1.5rem;
     color: #E0E0E0; /* Muted light text */
     border-bottom: 1px solid #145A38; /* Subtle Pthalo Green underline */
     padding-bottom: 5px;
 }
 
-.results-container ul {
+.results-container ul, .pot-container  ul {
     list-style-type: none;
     padding: 0;
     margin: 10px 0;
 }
 
-.results-container li {
+.results-container li, .pot-container  li {
     font-size: 0.8rem;
     color: #E0E0E0; /* Muted light text */
     padding: 5px 10px;
@@ -152,7 +228,7 @@
     align-items: center;
 }
 
-.results-container li button {
+.results-container li button, .pot-container  li button {
     font-size: 0.7rem;
     padding: 5px 8px;
     color: #E0E0E0; /* Muted light text */
@@ -163,213 +239,45 @@
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.results-container li button:hover {
+.results-container li button:hover, .pot-container li button:hover {
     background-color: #145A38; /* Slightly lighter Pthalo Green */
     transform: scale(1.05);
 }
 
-/* Slider styling */
-.slider-container {
-    margin: 20px 0;
-    display: flex;
-    flex-direction: column; /* Stack label, slider, and button */
-    gap: 15px;
-    align-items: center;
-    text-align: center;
-}
-
-.slider-container input[type="range"] {
-    -webkit-appearance: none;
-    width: 100%; /* Full width */
-    height: 12px; /* Larger height */
-    border-radius: 6px;
-    background: linear-gradient(to right, #1A1A1A var(--value, 50%), #333 var(--value, 50%)); /* Darker theme */
-    outline: none;
-    transition: background 0.3s;
-}
-
-.slider-container input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #123524; /* Matches theme */
-    border: 2px solid #fff; /* White outline for better visibility */
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.slider-container input[type="range"]::-webkit-slider-thumb:hover {
-    transform: scale(1.3);
-}
-
-.slider-container span {
-    font-size: 1rem;
-    color: #E0E0E0; /* Muted light text */
-}
-
-.slider-container button {
-    padding: 12px 24px;
-    font-size: 1rem;
-    background: linear-gradient(90deg, #145A38, #123524, #145A38);
-    color: white;
-    border: solid;
-    border-color: white;
-    border-width: 1px;
-    border-radius: 8px;
-    cursor: pointer;
-    background-size: 200%; /* For moving gradient */
-    animation: shiny-gradient 1.5s infinite linear;
-}
-
-@keyframes shiny-gradient {
-    from {
-        background-position: 0%;
+/* Wrapper for the results and pot containers */
+.results-pot-container {
+    display: flex; /* Enable Flexbox for horizontal alignment */
+    flex-direction: row; /* Place items side by side */
+    gap: 20px; /* Space between the two columns */
+    justify-content: center; /* Distribute space evenly */
+    align-items: flex-start; /* Align both containers at the top */
+    width: 100%; /* Ensure the wrapper spans the full width */
+    margin-top: 20px; /* Add space above the section */
+    box-sizing: border-box; /* Ensure padding is included in total width */
+    
+  }
+  
+  /* Individual containers */
+  .results-container, .pot-container {
+    flex: 1; /* Let both containers take up equal space */
+    max-width: 50%; /* Restrict each to half of the available width */
+    padding: 20px; /* Add padding inside the containers */
+    box-sizing: border-box; /* Ensure padding doesn’t overflow */
+    background: #0A0A0A; /* Background color matching theme */
+    border-radius: 10px; /* Rounded corners */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+  }
+  
+  /* Ensure they stack vertically on smaller screens */
+  @media (max-width: 600px) {
+    .results-pot-container {
+      flex-direction: column; /* Stack items vertically */
     }
-    to {
-        background-position: 200%;
+  
+    .results-container, .pot-container {
+      max-width: 100%; /* Full width for each container */
     }
-}
-
-.slider-container button:hover {
-    transform: scale(1.1);
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
-}
-
-
-/* Self-contained component with flex-grow and overflow */
-.advanced-tools {
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(26.27deg, #0A0A0A 45.38%, #123524 120.94%, #145A38 140.63%);
-    gap: 5px;
-    margin: 20px 0;
-    padding: 20px;
-    max-height: 20vh; /* Limit the height */
-    overflow-y: auto; /* Enable scrolling */
-    flex-grow: 1; /* Allow it to grow */
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
-    width: 100%;
-}
-
-/* Compact slider styling */
-.audio-features {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-}
-
-.slider-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    width: 100%;
-}
-
-.slider-container label {
-    flex: 1; /* Ensure checkboxes align with sliders */
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.9rem;
-    color: #E0E0E0;
-}
-
-.slider-container input[type="checkbox"] {
-    accent-color: #123524; /* Match theme */
-}
-
-.slider-container input[type="range"] {
-    -webkit-appearance: none;
-    width: 100%; /* Uniform slider width */
-    height: 6px;
-    border-radius: 5px;
-    background: linear-gradient(to right, #123524 var(--value, 50%), #fff var(--value, 50%));
-    outline: none;
-    transition: background 0.3s;
-}
-
-.slider-container input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #123524; /* Pthalo Green thumb */
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.slider-container input[type="range"]::-webkit-slider-thumb:hover {
-    transform: scale(1.1); /* Slight enlargement on hover */
-}
-
-.slider-container span {
-    font-size: 0.8rem;
-    color: #E0E0E0;
-    text-align: right;
-    flex-shrink: 0;
-    width: 40px; /* Fixed width for alignment */
-}
-
-.popularity-slider {
-    display: flex;
-    align-items: center; /* Aligns labels and slider inline */
-    gap: 15px;
-    width: 100%; /* Full width for the slider */
-    justify-content: space-between;
-}
-
-.popularity-slider .slider-labels {
-    display: flex;
-    justify-content: space-between;
-    flex-grow: 1; /* Labels span across the slider */
-    font-size: 0.9rem;
-    color: #E0E0E0;
-    text-align: center;
-}
-
-.popularity-slider input[type="range"] {
-    -webkit-appearance: none;
-    width: 100%; /* Full width of the container */
-    height: 10px; /* Slightly larger slider height */
-    border-radius: 5px;
-    background: linear-gradient(to right, #123524 var(--value, 0%), #1A1A1A var(--value, 0%)); /* Dynamic green-to-dark gradient */
-    outline: none;
-    transition: background 0.3s;
-}
-
-.popularity-slider input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #123524; /* Matches theme */
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.popularity-slider input[type="range"]::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-}
-
-.popularity-slider .slider-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1rem;
-    color: #E0E0E0;
-    text-align: center;
-    width: 100%; /* Full width alignment */
-    margin-bottom: 5px; /* Add some space between labels and slider */
-}
-
-.popularity-slider h2 {
-    text-align: center;
-    font-size: 1.2rem;
-    color: #E0E0E0;
-    margin-bottom: 10px;
-}
-
+  }
+  
 
 

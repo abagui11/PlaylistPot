@@ -21,6 +21,7 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
   const [playlistTracks, setPlaylistTracks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [averagePopularity, setAveragePopularity] = useState(0);
+  const [searchAttempted, setSearchAttempted] = useState(false);
 
   //const BACKEND_URL = "http://localhost:3001"; // Update for production
   const BACKEND_URL = "https://api.playlistpot.com"; // Update for production
@@ -446,10 +447,13 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
         headers: { Authorization: `Bearer ${accessToken}` },
         params: { limit: 50 },
       });
+      console.log('Raw API response:', response.data.items);
 
-      const filteredPlaylists = response.data.items.filter(playlist =>
-        playlist.name.toLowerCase().includes(playlistQuery.toLowerCase())
-      );
+      const filteredPlaylists = response.data.items
+        .filter((playlist) => playlist?.name) // Ensure playlist has a name
+        .filter((playlist) =>
+          playlist.name.toLowerCase().includes(playlistQuery.toLowerCase())
+    );
 
       setPlaylists(filteredPlaylists);
       setLoading(false);
@@ -492,57 +496,61 @@ const PlaylistGeneratorPage = ({ playlist, onBack, accessToken }) => {
   // Render Search Playlists Section
 const renderSearchPlaylistsSection = () => (
   <div className="search-section">
-    <h2>Search and Add from Playlists</h2>
-    <div className="input-button-wrapper">
-      <input
-        type="text"
-        placeholder="Search for a playlist"
-        value={playlistQuery}
-        onChange={(e) => setPlaylistQuery(e.target.value)}
-      />
-      <button onClick={fetchUserPlaylists} disabled={loading}>
-        {loading ? 'Loading...' : 'Search'}
-      </button>
-    </div>
-
-    {playlists.length > 0 ? (
-      <select
-        onChange={(e) => setSelectedPlaylist(e.target.value)}
-        value={selectedPlaylist || ''}
-        className="playlist-dropdown"
-      >
-        <option value="" disabled>Select a Playlist</option>
-        {playlists.map((playlist) => (
-          <option key={playlist.id} value={playlist.id}>
-            {playlist.name}
-          </option>
-        ))}
-      </select>
-    ) : (
-      <p className="no-playlists-message">No playlists found. Try a different search.</p>
-    )}
-
-    {selectedPlaylist && (
-      <button onClick={() => fetchPlaylistTracks(selectedPlaylist)} disabled={loading}>
-        {loading ? 'Loading Tracks...' : 'Load Playlist Tracks'}
-      </button>
-    )}
-
-    {playlistTracks.length > 0 && (
-      <div>
-        <h3>Tracks in Playlist</h3>
-        <button onClick={handleAddAllTracks}>Add All</button>
-        <ul>
-          {playlistTracks.map((track) => (
-            <li key={track.uri}>
-              <button onClick={() => addFetchedTrackToPlaylist(track)}>+</button>
-              <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(', ')}
-            </li>
-          ))}
-        </ul>
+      <h2>Search and Add from Playlists</h2>
+      <div className="input-button-wrapper">
+        <input
+          type="text"
+          placeholder="Search for a playlist"
+          value={playlistQuery}
+          onChange={(e) => setPlaylistQuery(e.target.value)}
+        />
+        <button onClick={fetchUserPlaylists} disabled={loading}>
+          {loading ? 'Loading...' : 'Search'}
+        </button>
       </div>
-    )}
-  </div>
+
+      {playlists.length > 0 ? (
+        <select
+          onChange={(e) => setSelectedPlaylist(e.target.value)}
+          value={selectedPlaylist || ''}
+          className="playlist-dropdown"
+        >
+          <option value="" disabled>Select a Playlist</option>
+          {playlists.map((playlist) => (
+            <option key={playlist.id} value={playlist.id}>
+              {playlist.name}
+            </option>
+          ))}
+        </select>
+      ) : (
+        searchAttempted && (
+          <p className="no-playlists-message">
+            No playlists found. Try a different search.
+          </p>
+        )
+      )}
+
+      {selectedPlaylist && (
+        <button onClick={() => fetchPlaylistTracks(selectedPlaylist)} disabled={loading}>
+          {loading ? 'Loading Tracks...' : 'Load Playlist Tracks'}
+        </button>
+      )}
+
+      {playlistTracks.length > 0 && (
+        <div>
+          <h3>Tracks in Playlist</h3>
+          <button onClick={handleAddAllTracks}>Add All</button>
+          <ul>
+            {playlistTracks.map((track) => (
+              <li key={track.uri}>
+                <button onClick={() => addFetchedTrackToPlaylist(track)}>+</button>
+                <strong>{track.name}</strong> by {track.artists.map(artist => artist.name).join(', ')}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
 );
 
   return (
@@ -577,36 +585,6 @@ const renderSearchPlaylistsSection = () => (
         )}
       </div>
 
-      {/* AI Feature */}
-      <div className = "ai-suggestions-section">
-      <div>
-        <h3>AI suggestions</h3>
-        <div className="input-button-wrapper">
-          <input
-            type="text"
-            placeholder="Add some jazz"
-            value={aiPrompt}
-            onChange={(e) => setAiPrompt(e.target.value)}
-          />
-          <button onClick={handleAiPromptSubmit}>Submit</button>
-        </div>
-      </div>
-
-      {aiSuggestions.length > 0 && (
-        <div>
-          <h3>Suggested Additions</h3>
-          <ul>
-            {aiSuggestions.map((item, index) => (
-              <li key={index}>
-                <button onClick={() => addSuggestionToPlaylist(item)}>+</button>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      </div>
-      
       {/* Download personal playlist section */}
       {renderSearchPlaylistsSection()}
 
